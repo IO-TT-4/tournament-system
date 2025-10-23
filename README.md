@@ -16,7 +16,7 @@ A universal platform for creating and tracking various types of tournaments, e.g
 
 ## Project stages:
 
-- [X] Stage 1: Initial System Specification
+- [ ] Stage 1: Initial System Specification
 - [ ] Stage 2: Use Case Modeling
 - [ ] Stage 3: Structure Modeling (+Prototype #1)
 - [ ] Stage 4: Behavior Modeling (+Prototype #2)
