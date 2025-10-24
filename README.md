@@ -6,13 +6,13 @@ A universal platform for creating and tracking various types of tournaments, e.g
 
 ## Team
 
-| Role   | name                                        |
-| ------ | ------------------------------------------- |
-| PM     | [Maj Piotr](https://github.com/AliasMaster) |
-| Member |                                             |
-| Member |                                             |
-| Member |                                             |
-| Member |                                             |
+| Role           | name                                                 |
+| -------------- | ---------------------------------------------------- |
+| PM / Tech Lead | [Piotr Maj](https://github.com/AliasMaster)          |
+| Dev            | [Bartosz Jędryka](https://github.com/JedrBart)       |
+| QA             | [Aleksandra Kuś](https://github.com/AleksandraKus11) |
+| Dev            | [Wojciech Pędziwiatr](https://github.com/Wojtek4321) |
+| Dev            | [Adrian Suchenia](https://github.com/Suchy777)       |
 
 ## Project stages:
 
