@@ -1,0 +1,12 @@
+{
+  "titleLogin": "Strona Logowania",
+  "titleRegister": "Strona Rejestracji",
+  "login": "Nazwa użytkownika",
+  "or": "lub",
+  "password": "Hasło",
+  "buttonLogin": "Zaloguj się",
+  "buttonRegister": "Zarejestruj się",
+  "retype": "Powtórz",
+  "forgotPassword": "Zapomniałeś hasła?",
+  "createAccount": "Stwórz konto"
+}

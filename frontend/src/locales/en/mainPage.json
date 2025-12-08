@@ -1,0 +1,9 @@
+{
+  "title": "Tournament System",
+  "description": "A universal platform for creating and tracking various types of tournaments, e.g., e-sports/board games. The system must allow participants (both individual and team) to be added and then automatically generate tournament brackets in various systems. The visualization of brackets and the updating and presentation of results will be key. It stores historical data.",
+  "currentTournaments": "Active tournaments",
+  "futureTournaments": "Upcoming tournaments",
+  "date": "Date",
+  "rounds": "Rounds",
+  "NoPlayers": "Players"
+}

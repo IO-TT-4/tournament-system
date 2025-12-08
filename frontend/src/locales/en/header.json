@@ -1,0 +1,13 @@
+{
+  "menu": {
+    "guest": {
+      "login": "Sign in",
+      "register": "Register"
+    },
+    "authorized": {
+      "myprofile": "My profile",
+      "settings": "Settings",
+      "logout": "Logout"
+    }
+  }
+}

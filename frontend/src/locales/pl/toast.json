@@ -1,0 +1,6 @@
+{
+  "loginError": "Najpierw trzeba się zalogować",
+  "serverError": "Błąd serwera",
+  "loginSuccess": "Pomyślnie zalogowano",
+  "logoutSuccess": "Wylogowano pomyślnie"
+}

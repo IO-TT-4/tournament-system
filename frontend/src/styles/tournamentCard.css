@@ -1,0 +1,22 @@
+@import url('./theme.css');
+
+.tournament-card {
+  padding: 8px 16px;
+  -webkit-box-shadow: -4px 4px 10px -8px var(--color-primary);
+  -moz-box-shadow: -4px 4px 10px -8px var(--color-primary);
+  box-shadow: -4px 4px 10px -8px var(--color-primary);
+  cursor: pointer;
+  border-radius: 16px;
+}
+
+.tournament-card:hover {
+  -webkit-box-shadow: -4px 4px 10px -6px var(--color-primary-hover);
+  -moz-box-shadow: -4px 4px 10px -6px var(--color-primary-hover);
+  box-shadow: -4px 4px 10px -6px var(--color-primary-hover);
+}
+
+.tournament-card-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}

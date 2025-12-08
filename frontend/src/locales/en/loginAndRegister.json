@@ -1,0 +1,12 @@
+{
+  "titleLogin": "Login",
+  "titleRegister": "Register Page",
+  "login": "Username",
+  "or": "or",
+  "password": "Password",
+  "buttonLogin": "Sign in",
+  "buttonRegister": "Register",
+  "retype": "Re-type",
+  "forgotPassword": "Forgot password?",
+  "createAccount": "Create an account"
+}

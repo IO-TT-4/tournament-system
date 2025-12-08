@@ -1,0 +1,221 @@
+@import url('./theme.css');
+
+header {
+  width: 100%;
+  background-color: var(--color-primary);
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 32px;
+  margin-bottom: 64px;
+}
+
+header nav {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: row;
+  gap: 16px;
+}
+
+header ul {
+  list-style: none;
+  display: flex;
+  gap: 16px;
+  margin: 0;
+  font-size: 1.5rem;
+  padding: 0;
+}
+
+header ul li {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+header ul li:hover {
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.logo {
+  font-size: 2.5rem;
+}
+
+.logo a {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  gap: 16px;
+}
+
+.logo span {
+  letter-spacing: 1.2px;
+}
+
+.logo img {
+  height: 60px;
+}
+
+.language-selector select {
+  padding: 8px 24px 8px 12px;
+  font-size: 16px;
+  border-radius: 6px;
+  border: 1px solid var(--color-border);
+  background-color: var(--color-background);
+  color: var(--color-text-primary);
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg width='10' height='6' viewBox='0 0 10 6' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath fill='%234B6EF5' d='M0 0l5 6 5-6z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  background-size: 10px 6px;
+}
+
+.language-selector select:hover,
+.language-selector select:focus {
+  border-color: var(--color-primary-hover);
+  outline: none;
+}
+
+.hamburger {
+  display: none;
+  flex-direction: column;
+  cursor: pointer;
+  gap: 5px;
+}
+
+.hamburger span {
+  height: 3px;
+  width: 25px;
+  background-color: var(--color-text-on-primary);
+  border-radius: 2px;
+  transition: all 0.3s;
+}
+
+.hamburger.open span:nth-child(1) {
+  transform: rotate(45deg) translate(7px, 5px);
+}
+
+.hamburger.open span:nth-child(2) {
+  opacity: 0;
+}
+
+.hamburger.open span:nth-child(3) {
+  transform: rotate(-45deg) translate(6px, -4px);
+}
+
+.avatar {
+  transition: all 0.2s ease-in-out;
+  border-radius: 50%;
+  /* background-color: #fff; */
+  box-shadow: 0px 0px 8px -4px #2c2c2c;
+}
+
+.avatar:hover {
+  box-shadow: 0px 0px 14px -4px #2c2c2c;
+  -webkit-box-shadow: 0px 0px 14px -4px #2c2c2c;
+  -moz-box-shadow: 0px 0px 14px -4px #2c2c2c;
+}
+
+.avatar-dropdown {
+  position: relative;
+  cursor: pointer;
+}
+
+.avatar-wrapper {
+  display: inline-block;
+}
+
+/* Avatar dropdown menu */
+
+.dropdown-menu {
+  position: absolute;
+  top: 70px;
+  right: 0;
+  background: var(--color-background);
+  border-radius: 8px;
+  box-shadow: 0 4px 12px var(--color-surface);
+  list-style: none;
+  padding: 8px 0;
+  margin: 0;
+  min-width: 150px;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  color: var(--color-text-on-primary);
+}
+
+.dropdown-menu li {
+  padding: 8px 16px;
+}
+
+.dropdown-menu li:hover {
+  background-color: var(--color-background);
+}
+
+.dropdown-menu li button {
+  background: none;
+  border: none;
+  width: 100%;
+  text-align: left;
+  padding: 0;
+  font: inherit;
+  cursor: pointer;
+}
+
+@media (max-width: 768px) {
+  header {
+    margin-bottom: 32px;
+  }
+
+  .hamburger {
+    display: flex;
+  }
+
+  .nav-menu {
+    position: absolute;
+    top: 90px;
+    right: 0;
+    background-color: var(--color-primary);
+    flex-direction: column;
+    display: none;
+    padding: 12px 0px;
+  }
+
+  .nav-menu.active {
+    display: flex;
+  }
+
+  .nav-menu li {
+    padding: 12px 24px;
+    text-align: center;
+  }
+
+  .dropdown-menu {
+    background: none;
+    position: relative;
+    top: 0;
+    box-shadow: none;
+    padding: 0;
+    align-items: center;
+  }
+
+  .avatar {
+    display: none;
+  }
+
+  .dropdown-menu li:hover {
+    background-color: transparent;
+  }
+
+  li:has(.dropdown-menu):hover {
+    text-decoration: none;
+  }
+}

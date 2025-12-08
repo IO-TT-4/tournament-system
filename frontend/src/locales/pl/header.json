@@ -1,0 +1,13 @@
+{
+  "menu": {
+    "guest": {
+      "login": "Zaloguj się",
+      "register": "Zarejestruj się"
+    },
+    "authorized": {
+      "myprofile": "Mój profil",
+      "settings": "Ustawienia",
+      "logout": "Wyloguj"
+    }
+  }
+}

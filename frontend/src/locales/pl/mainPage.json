@@ -1,0 +1,9 @@
+{
+  "title": "System parowania",
+  "description": "Uniwersalna platforma do tworzenia i śledzenia różnych typów turniejów, np. e-sportowych lub planszowych. System musi umożliwiać dodawanie uczestników (zarówno indywidualnych, jak i drużynowych), a następnie automatyczne generowanie drabinek turniejowych w różnych systemach. Kluczowe będzie wizualizowanie drabinek oraz aktualizacja i prezentacja wyników. System przechowuje również dane historyczne.",
+  "currentTournaments": "Aktualne turnieje",
+  "futureTournaments": "Nadchodzące turnieje",
+  "date": "Data",
+  "rounds": "Rundy",
+  "NoPlayers": "Graczy"
+}

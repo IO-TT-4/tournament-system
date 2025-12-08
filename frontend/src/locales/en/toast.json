@@ -1,0 +1,6 @@
+{
+  "loginError": "Please login",
+  "serverError": "Server error occured",
+  "loginSuccess": "Login Success",
+  "logoutSuccess": "Logout Success"
+}

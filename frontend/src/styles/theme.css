@@ -1,0 +1,59 @@
+:root {
+  --color-primary: #4b6ef5;
+  --color-primary-hover: #3f5ed4;
+  --color-background: #ffffff;
+  --color-surface: #f4f6fb;
+  --color-text-primary: #0f172a;
+  --color-text-secondary: #475569;
+  --color-border: #e2e8f0;
+  --color-accent-success: #16a43a;
+  --color-accent-error: #dc2626;
+  --color-accent-warning: #f59e0b;
+  --color-text-on-primary: #ffffff;
+
+  --mobile-screen: 768px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-primary: #6b8cff;
+    --color-primary-hover: #3f5ed4;
+    --color-background: #0d1117;
+    --color-surface: #161b22;
+    --color-text-primary: #e2e8f0;
+    --color-text-secondary: #94a3b8;
+    --color-border: #2d3648;
+    --color-accent-success: #22c55e;
+    --color-accent-error: #ef4444;
+    --color-accent-warning: #fbbf24;
+    --color-text-on-primary: #ffffff;
+  }
+}
+
+html.dark {
+  --color-primary: #6b8cff;
+  --color-primary-hover: #3f5ed4;
+  --color-background: #0d1117;
+  --color-surface: #161b22;
+  --color-text-primary: #e2e8f0;
+  --color-text-secondary: #94a3b8;
+  --color-border: #2d3648;
+  --color-accent-success: #22c55e;
+  --color-accent-error: #ef4444;
+  --color-accent-warning: #fbbf24;
+  --color-text-on-primary: #ffffff;
+}
+
+html.light {
+  --color-primary: #4b6ef5;
+  --color-primary-hover: #3f5ed4;
+  --color-background: #ffffff;
+  --color-surface: #f4f6fb;
+  --color-text-primary: #0f172a;
+  --color-text-secondary: #475569;
+  --color-border: #e2e8f0;
+  --color-accent-success: #16a43a;
+  --color-accent-error: #dc2626;
+  --color-accent-warning: #f59e0b;
+  --color-text-on-primary: #ffffff;
+}
