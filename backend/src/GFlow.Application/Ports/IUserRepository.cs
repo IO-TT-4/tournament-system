@@ -5,8 +5,8 @@ namespace GFlow.Application.Ports
     public interface IUserRepository
     {
 
-        public User? Get(string id);
-        public User? GetByUsername(string username);
-        public User? Add(User user);
+        public Task<User> Get(string id);
+        public Task<User> GetByUsername(string username);
+        public Task<User> Add(User user);
     }
 }

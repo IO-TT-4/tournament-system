@@ -3,7 +3,7 @@ import { handleError } from '../helpers/ErrorHandler';
 
 export async function loginAPI(username, password) {
   try {
-    const data = api.post('/auth/login', {
+    const data = api.post('/login', {
       username: username,
       password: password,
     });
@@ -15,7 +15,7 @@ export async function loginAPI(username, password) {
 
 export async function registerApi(email, username, password) {
   try {
-    const data = api.post('/auth/register', {
+    const data = api.post('/register', {
       username: username,
       password: password,
       email: email,

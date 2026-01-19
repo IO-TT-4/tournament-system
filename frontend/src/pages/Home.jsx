@@ -38,10 +38,10 @@ export default function MainPage() {
   const currentTournaments = currentTournamentList.map(createTournamentCard);
   const upcomingTournaments = upcomingTournamentList.map(createTournamentCard);
 
-  function createTournamentCard({ id, title, metaData }) {
+  function createTournamentCard({ id, name, metaData }) {
     return (
       <Link to={`/tournament/${id}`} key={id}>
-        <TournamentCard title={title} metaData={metaData} />
+        <TournamentCard title={name} metaData={metaData} />
       </Link>
     );
   }

@@ -1,4 +1,5 @@
 using System.Reflection;
+using System.Threading.Tasks;
 using GFlow.Application.DTOs;
 using GFlow.Application.Ports;
 using GFlow.Domain.Entities;
@@ -7,7 +8,7 @@ namespace GFlow.Application.Services
 {
     public class TournamentService : ITournamentService
     {
-        public Tournament? CreateTournament(CreateTournamentRequest request)
+        public async Task<Tournament?> CreateTournamentAsync(CreateTournamentRequest request)
         {
             if (string.IsNullOrWhiteSpace(request.Name) || request.Name.Length < 5)
             {
@@ -30,8 +31,9 @@ namespace GFlow.Application.Services
                 StartDate = request.StartDate,
                 EndDate = request.EndDate
             };
+            
 
-            return _tournamentRepo.Add(tournament);
+            return await _tournamentRepo.Add(tournament);; 
         }
         
         private readonly ITournamentRepository _tournamentRepo;
@@ -42,19 +44,19 @@ namespace GFlow.Application.Services
         }
 
 
-        public List<Tournament> GetCurrentTournaments()
+        public async Task<List<Tournament>> GetCurrentTournaments()
         {
-            return _tournamentRepo.GetCurrent();
+            return await _tournamentRepo.GetCurrent();
         }
 
-        public Tournament? GetTournament(string id)
+        public async Task<Tournament?> GetTournament(string id)
         {
-            return _tournamentRepo.Get(id);
+            return await _tournamentRepo.GetTournament(id);
         }
 
-        public List<Tournament> GetUpcomingTournaments()
+        public async Task<List<Tournament>> GetUpcomingTournaments()
         {
-            return _tournamentRepo.GetUpcoming();
+            return await _tournamentRepo.GetUpcoming();
         }
     }
 }

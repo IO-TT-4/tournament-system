@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using GFlow.Domain.Entities;
 using GFlow.Application.DTOs;
 using GFlow.Application.Ports;
+using Microsoft.AspNetCore.Authorization;
 
 namespace GFlow.Api.Controllers
 {
@@ -9,78 +10,73 @@ namespace GFlow.Api.Controllers
     [Route("api/[controller]")]
     public class TournamentController : ControllerBase
     {
-
-        public readonly ITournamentService tournamentService;
+        private readonly ITournamentService _tournamentService;
 
         public TournamentController(ITournamentService tournamentService)
         {
-            this.tournamentService = tournamentService;    
+            _tournamentService = tournamentService;    
         }
 
         [HttpPost]
-        public IActionResult Create(CreateTournamentRequest request)
+        [Authorize]
+        public async Task<ActionResult<TournamentResponse>> Create([FromBody] CreateTournamentRequest request)
         {
-            Tournament? tournament = tournamentService.CreateTournament(request);
+            var tournament = await _tournamentService.CreateTournamentAsync(request);
 
-            if(tournament is null)
+            if (tournament is null)
             {
-                return BadRequest();
+                // Jeśli serwis nie stworzył turnieju (np. błąd walidacji wewnątrz)
+                return BadRequest("Could not create tournament.");
             }
 
-            return CreatedAtAction(nameof(Get), new { id = tournament.Id }, tournament);
+            var response = MapToResponse(tournament);
+
+            // CreatedAtAction jest lepsze - zwraca nagłówek Location do nowego zasobu
+            return CreatedAtAction(nameof(Get), new { id = tournament.Id }, response);
         }
 
-        [HttpGet("{id}")]
-        public IActionResult Get(string id)
+        [HttpGet("{id}")] // Ograniczenie do formatu Guid
+        public async Task<ActionResult<TournamentResponse>> Get(string id)
         {
-            Tournament? tournament = tournamentService.GetTournament(id);
+            var tournament = await _tournamentService.GetTournament(id);
 
-            if(tournament is null)
+            if (tournament is null)
             {
-                return BadRequest();
+                return NotFound($"Tournament with ID {id} not found.");
             }
             
-            return Ok(new
-            {
-               id=tournament.Id.ToString(),
-               name=tournament.Name 
-            });
+            return Ok(MapToResponse(tournament));
         }
 
         [HttpGet("upcoming")]
-        public IActionResult GetUpcoming()
+        public async Task<ActionResult<IEnumerable<TournamentResponse>>> GetUpcoming()
         {
-            var tournaments = tournamentService.GetUpcomingTournaments();
-
-            var response = tournaments.Select(t => new TournamentResponse
-            {
-                Id = t.Id,
-                Name = t.Name,
-                OrganizerName = t.Organizer?.Username ?? "Unknown",
-                PlayerLimit = t.PlayerLimit,
-                StartDate = t.StartDate
-            });
-
+            var tournaments = await _tournamentService.GetUpcomingTournaments();
+            var response = tournaments.Select(MapToResponse);
             return Ok(response);
         }
 
         [HttpGet("current")]
-        public IActionResult GetCurrent()
+        public async Task<ActionResult<IEnumerable<TournamentResponse>>> GetCurrent()
         {
-            var tournaments = tournamentService.GetCurrentTournaments();
+            var tournaments = await _tournamentService.GetCurrentTournaments();
+            var response = tournaments.Select(MapToResponse);
+            return Ok(response);
+        }
 
-            var response = tournaments.Select(t => new TournamentResponse
+        // Pomocnicza metoda mapująca, aby nie powtarzać kodu (DRY)
+        private static TournamentResponse MapToResponse(Tournament t)
+        {
+            return new TournamentResponse
             {
                 Id = t.Id,
                 Name = t.Name,
                 OrganizerName = t.Organizer?.Username ?? "Unknown",
                 PlayerLimit = t.PlayerLimit,
-                StartDate = t.StartDate
-            });
-
-            return Ok(response);
+                StartDate = t.StartDate,
+                EndDate = t.EndDate
+                // Tutaj możesz dodać status turnieju lub liczbę zapisanych osób
+            };
         }
     }
-
-    
 }

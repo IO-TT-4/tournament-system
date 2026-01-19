@@ -2,5 +2,7 @@
   "loginError": "Please login",
   "serverError": "Server error occured",
   "loginSuccess": "Login Success",
-  "logoutSuccess": "Logout Success"
+  "logoutSuccess": "Logout Success",
+  "InvalidCredentials": "Invalid credentials",
+  "passwordNotMatch": "Passwords don't match"
 }

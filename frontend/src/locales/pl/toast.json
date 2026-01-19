@@ -2,5 +2,7 @@
   "loginError": "Najpierw trzeba się zalogować",
   "serverError": "Błąd serwera",
   "loginSuccess": "Pomyślnie zalogowano",
-  "logoutSuccess": "Wylogowano pomyślnie"
+  "logoutSuccess": "Wylogowano pomyślnie",
+  "InvalidCredentials": "Błędny login lub hasło",
+  "passwordNotMatch": "Hasło są różne"
 }

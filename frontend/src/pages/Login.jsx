@@ -34,7 +34,7 @@ export default function Login() {
           <h2>{t('titleLogin')}</h2>
           <input
             type="text"
-            placeholder={`${t('login')} ${t('or')} email`}
+            placeholder={`${t('login')}`}
             value={username}
             onChange={(e) => setUsername(e.target.value)}
           />

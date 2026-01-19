@@ -5,9 +5,9 @@ namespace GFlow.Application.Ports
 {
     public interface ITournamentService
     {
-        public Tournament? GetTournament(string id);
-        public List<Tournament> GetCurrentTournaments();
-        public List<Tournament> GetUpcomingTournaments();
-        public Tournament? CreateTournament(CreateTournamentRequest request);
+        public Task<Tournament> GetTournament(string id);
+        public Task<List<Tournament>> GetCurrentTournaments();
+        public Task<List<Tournament>> GetUpcomingTournaments();
+        public Task<Tournament> CreateTournamentAsync(CreateTournamentRequest request);
     }
 }

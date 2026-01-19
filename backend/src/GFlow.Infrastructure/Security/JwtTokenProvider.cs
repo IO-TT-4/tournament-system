@@ -11,11 +11,13 @@ namespace GFlow.Infrastructure.Security
     {
         private readonly string _secret;
         private readonly int _expiryMinutes;
+        private readonly string _issuer;
 
-        public JwtTokenProvider(string secret, int expiryMinutes = 60)
+        public JwtTokenProvider(string secret, string issuer, int expiryMinutes = 60)
         {
             _secret = secret;
             _expiryMinutes = expiryMinutes;
+            _issuer = issuer;
         }
 
         public string GenerateToken(string userId, string username)
@@ -31,8 +33,8 @@ namespace GFlow.Infrastructure.Security
             };
 
             var token = new JwtSecurityToken(
-                issuer: "GFlow",
-                audience: "GFlow",
+                issuer: _issuer,
+                audience: _issuer,
                 claims: claims,
                 expires: DateTime.UtcNow.AddMinutes(_expiryMinutes),
                 signingCredentials: creds

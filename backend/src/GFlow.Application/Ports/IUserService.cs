@@ -5,8 +5,6 @@ namespace GFlow.Application.Ports
 {
     public interface IUserService
     {
-        public User? Login(LoginRequest request);
-        public User? RegisterUser(RegisterRequest request);
-        public User? GetUser(string id);
+        public Task<User> GetUser(string id);
     }
 }

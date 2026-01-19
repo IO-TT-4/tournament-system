@@ -1,17 +1,17 @@
 using GFlow.Application.Ports;
 using GFlow.Domain.Entities;
-using GFlow.Infrastructure.Persistance.Migrations;
+using Microsoft.EntityFrameworkCore;
 
 namespace GFlow.Infrastructure.Persistance.Repositories
 {
     public class UserRepositoryPostgres : IUserRepository
     {
 
-        public User? Add(User user)
+        public async Task<User> Add(User user)
         {
-            _context.Users.Add(user);
-            _context.SaveChanges();
-            return user;
+            await _context.Users.AddAsync(user);
+            await _context.SaveChangesAsync();
+            return await Get(user.Id);
         }
         
         private readonly AppDbContext _context;
@@ -21,14 +21,14 @@ namespace GFlow.Infrastructure.Persistance.Repositories
             _context = context;
         }
 
-        public User? Get(string id)
+        public async Task<User> Get(string id)
         {
-            return _context.Users.FirstOrDefault(u => u.Id == id);
+            return await _context.Users.FirstOrDefaultAsync(u => u.Id == id);
         }
 
-        public User? GetByUsername(string username)
+        public async Task<User> GetByUsername(string username)
         {
-            return _context.Users.FirstOrDefault(u => u.Username == username);
+            return await _context.Users.FirstOrDefaultAsync(u => u.Username == username);
         }
     }
 }

@@ -3,7 +3,9 @@ namespace GFlow.Domain.ValueObjects
     public enum TournamentSystemType
     {
         SINGLE_ELEMINATION,
-        ROUND_ROBIN,
+        DOUBLE_ELEMINATION,
+        SINGLE_ROUND_ROBIN,
+        DOUBLE_ROUND_ROBIN,
         SWISS
     }
 }
