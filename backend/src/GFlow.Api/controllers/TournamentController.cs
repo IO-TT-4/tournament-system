@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
-using GFlow.Application.Services;
-using GFlow.Domain.Models;
+using GFlow.Domain.Entities;
+using GFlow.Application.DTOs;
+using GFlow.Application.Ports;
 
 namespace GFlow.Api.Controllers
 {
@@ -8,28 +9,76 @@ namespace GFlow.Api.Controllers
     [Route("api/[controller]")]
     public class TournamentController : ControllerBase
     {
-        [HttpGet("{reqId}")]
-        public IActionResult Get(int reqId)
+
+        public readonly ITournamentService tournamentService;
+
+        public TournamentController(ITournamentService tournamentService)
         {
-            TournamentService aa = new TournamentService();
-            Tournament tournament = aa.getTournament(reqId);
-            return Ok(tournament);
+            this.tournamentService = tournamentService;    
         }
 
-        [HttpGet("current")]
-        public IActionResult GetCurrent(int reqId)
+        [HttpPost]
+        public IActionResult Create(CreateTournamentRequest request)
         {
-            TournamentService aa = new TournamentService();
-            List<Tournament> list = aa.GetCurrentTournaments();
-            return Ok(list);
+            Tournament? tournament = tournamentService.CreateTournament(request);
+
+            if(tournament is null)
+            {
+                return BadRequest();
+            }
+
+            return CreatedAtAction(nameof(Get), new { id = tournament.Id }, tournament);
+        }
+
+        [HttpGet("{id}")]
+        public IActionResult Get(string id)
+        {
+            Tournament? tournament = tournamentService.GetTournament(id);
+
+            if(tournament is null)
+            {
+                return BadRequest();
+            }
+            
+            return Ok(new
+            {
+               id=tournament.Id.ToString(),
+               name=tournament.Name 
+            });
         }
 
         [HttpGet("upcoming")]
-        public IActionResult GetUpcoming(int reqId)
+        public IActionResult GetUpcoming()
         {
-            TournamentService aa = new TournamentService();
-            List<Tournament> list = aa.GetUpcomingTournaments();
-            return Ok(list);
+            var tournaments = tournamentService.GetUpcomingTournaments();
+
+            var response = tournaments.Select(t => new TournamentResponse
+            {
+                Id = t.Id,
+                Name = t.Name,
+                OrganizerName = t.Organizer?.Username ?? "Unknown",
+                PlayerLimit = t.PlayerLimit,
+                StartDate = t.StartDate
+            });
+
+            return Ok(response);
+        }
+
+        [HttpGet("current")]
+        public IActionResult GetCurrent()
+        {
+            var tournaments = tournamentService.GetCurrentTournaments();
+
+            var response = tournaments.Select(t => new TournamentResponse
+            {
+                Id = t.Id,
+                Name = t.Name,
+                OrganizerName = t.Organizer?.Username ?? "Unknown",
+                PlayerLimit = t.PlayerLimit,
+                StartDate = t.StartDate
+            });
+
+            return Ok(response);
         }
     }
 

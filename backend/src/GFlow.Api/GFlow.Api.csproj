@@ -11,4 +11,7 @@
   <ItemGroup>
     <ProjectReference Include="..\GFlow.Application\GFlow.Application.csproj" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\GFlow.Infrastructure\GFlow.Infrastructure.csproj" />
+  </ItemGroup>
 </Project>

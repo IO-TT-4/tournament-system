@@ -1,64 +1,60 @@
 using System.Reflection;
-using GFlow.Domain.Models;
+using GFlow.Application.DTOs;
+using GFlow.Application.Ports;
+using GFlow.Domain.Entities;
 
 namespace GFlow.Application.Services
 {
-    public class TournamentService
+    public class TournamentService : ITournamentService
     {
-        Dictionary<int, Tournament> currentTournaments = BuildDictionary();
-        Dictionary<int, Tournament> upcomingTournaments = BuildDictionaryUpcoming();
-
-        public Tournament getTournament(int id)
+        public Tournament? CreateTournament(CreateTournamentRequest request)
         {
-            return currentTournaments[id];
+            if (string.IsNullOrWhiteSpace(request.Name) || request.Name.Length < 5)
+            {
+                return null;
+            }
+
+            if (request.MaxParticipants <= 0)
+            {
+                return null;
+            }
+
+            var tournament = new Tournament
+            {
+                Id = Guid.NewGuid().ToString(),
+                Name = request.Name,
+                OrganizerId = request.OrganizerId,
+                SystemType = request.SystemType,
+                PlayerLimit = request.MaxParticipants, 
+                Status = Domain.ValueObjects.TournamentStatus.CREATED,
+                StartDate = request.StartDate,
+                EndDate = request.EndDate
+            };
+
+            return _tournamentRepo.Add(tournament);
         }
+        
+        private readonly ITournamentRepository _tournamentRepo;
+
+        public TournamentService(ITournamentRepository tournamentRepository)
+        {
+            _tournamentRepo = tournamentRepository;
+        }
+
 
         public List<Tournament> GetCurrentTournaments()
         {
-            List<Tournament> _tournaments = new List<Tournament>();
-            foreach (var item in currentTournaments)
-            {
-                _tournaments.Add(item.Value);
-            }
+            return _tournamentRepo.GetCurrent();
+        }
 
-            return _tournaments;
+        public Tournament? GetTournament(string id)
+        {
+            return _tournamentRepo.Get(id);
         }
 
         public List<Tournament> GetUpcomingTournaments()
         {
-            List<Tournament> _tournaments = new List<Tournament>();
-            foreach (var item in upcomingTournaments)
-            {
-                _tournaments.Add(item.Value);
-            }
-
-            return _tournaments;
+            return _tournamentRepo.GetUpcoming();
         }
-
-        private static Dictionary<int, Tournament> BuildDictionary() => new()
-        {
-            {
-                1, new Tournament(1, "Tata Steel", "17.11.2025", "18.11.2025")
-            },
-            {
-                2, new Tournament(2, "Tata Steel", "17.11.2025", "18.11.2025")
-            },
-            {
-                3, new Tournament(3, "Tata Steel", "17.11.2025", "18.11.2025")
-            },
-        };
-
-        private static Dictionary<int, Tournament> BuildDictionaryUpcoming() => new()
-        {
-            {
-                4, new Tournament(4, "Tata Steel", "17.11.2025", "18.11.2025")
-            },
-            {
-                5, new Tournament(5, "Tata Steel", "17.11.2025", "18.11.2025")
-            },
-            {
-                6, new Tournament(6, "Tata Steel", "17.11.2025", "18.11.2025")
-            },
-        };
     }
 }
