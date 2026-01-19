@@ -17,7 +17,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 // --- KONFIGURACJA ZMIENNYCH ---
 var appUrls = Environment.GetEnvironmentVariable("APP_URLS") ?? "http://localhost:5249";
-var connectionString = Environment.GetEnvironmentVariable("DB_CONNECTION") ?? "Data Source=tournament.db";
+var connectionString = Environment.GetEnvironmentVariable("DB_CONNECTION") ?? "Host=localhost;Database=tournament_db;Username=postgres;Password=mysecretpassword";
 var jwtKey = Environment.GetEnvironmentVariable("JWT_KEY") ?? "DefaultSuperSecretKey123_MustBeLong";
 var jwtIssuer = Environment.GetEnvironmentVariable("JWT_ISSUER") ?? "GFlowApp";
 
