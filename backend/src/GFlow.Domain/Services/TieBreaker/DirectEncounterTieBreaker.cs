@@ -9,19 +9,19 @@ namespace GFlow.Domain.Services.TieBreakers
 
         public double Calculate(string userId, List<Match> allMatches, List<StandingsEntry> currentStandings)
         {
-            // 1. Znajdź punkty zawodnika, dla którego liczysz tie-breaker
+            // 1. Find points of the participant for whom you are calculating the tie-breaker
             var userPoints = currentStandings.First(s => s.UserId == userId).Points;
 
-            // 2. Znajdź wszystkich innych graczy, którzy mają tyle samo punktów (grupa remisowa)
+            // 2. Find all other players with the same points (tie group)
             var tiedPlayerIds = currentStandings
                 .Where(s => s.Points == userPoints)
                 .Select(s => s.UserId)
                 .ToList();
 
-            // Jeśli nikt inny nie ma tylu samo punktów, ten tie-breaker nie ma znaczenia (zwracamy 0)
+            // If no one else has the same points, this tie-breaker doesn't matter (return 0)
             if (tiedPlayerIds.Count < 2) return 0;
 
-            // 3. Oblicz punkty zdobyte przez userId TYLKO w meczach z osobami z tiedPlayerIds
+            // 3. Calculate points earned by userId ONLY in matches with people from tiedPlayerIds
             double directPoints = 0;
             var directMatches = allMatches.Where(m => m.IsCompleted &&
                 tiedPlayerIds.Contains(m.PlayerHomeId) && 

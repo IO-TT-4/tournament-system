@@ -1,23 +1,27 @@
 using GFlow.Domain.ValueObjects;
+using System.Diagnostics.CodeAnalysis;
 
 namespace GFlow.Domain.Entities
 {
     public class Match
     {
         public string Id { get; set; } = Guid.NewGuid().ToString();
-        public string PlayerHomeId { get; internal set; }
-        public string PlayerAwayId { get; internal set; }
+        public required string PlayerHomeId { get; set; }
+        public required string PlayerAwayId { get; set; }
 
         public int RoundNumber { get; set; }
 
-        public string TournamentId { get; set; }
+        public required string TournamentId { get; set; }
 
         public int? PositionInRound { get; set; }
 
         public MatchResult? Result { get; private set; }
+        
+        public List<MatchEvent> Events { get; set; } = new();
 
         private Match() { }
 
+        [SetsRequiredMembers]
         public Match(string id, string playerAId, string playerBId, int roundNumber, string tournamentId)
         {
             Id = id;

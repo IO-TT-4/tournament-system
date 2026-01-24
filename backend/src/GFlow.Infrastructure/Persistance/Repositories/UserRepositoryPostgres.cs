@@ -7,7 +7,7 @@ namespace GFlow.Infrastructure.Persistance.Repositories
     public class UserRepositoryPostgres : IUserRepository
     {
 
-        public async Task<User> Add(User user)
+        public async Task<User?> Add(User user)
         {
             await _context.Users.AddAsync(user);
             await _context.SaveChangesAsync();
@@ -21,14 +21,31 @@ namespace GFlow.Infrastructure.Persistance.Repositories
             _context = context;
         }
 
-        public async Task<User> Get(string id)
+        public async Task<User?> Get(string id)
         {
             return await _context.Users.FirstOrDefaultAsync(u => u.Id == id);
         }
 
-        public async Task<User> GetByUsername(string username)
+        public async Task<User?> GetByUsername(string username)
         {
             return await _context.Users.FirstOrDefaultAsync(u => u.Username == username);
+        }
+
+        public async Task<User?> Update(User user)
+        {
+            _context.Users.Update(user);
+            await _context.SaveChangesAsync();
+            return user;
+        }
+
+        public async Task<User?> GetByRefreshToken(string refreshToken)
+        {
+            return await _context.Users.FirstOrDefaultAsync(u => u.RefreshToken == refreshToken);
+        }
+
+        public async Task<IEnumerable<User>> GetAll()
+        {
+            return await _context.Users.ToListAsync();
         }
     }
 }

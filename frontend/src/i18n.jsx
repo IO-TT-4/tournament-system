@@ -24,11 +24,15 @@ i18n.use(initReactI18next).init({
       toast: ToastEn,
     },
   },
-  lng: 'pl',
+  lng: localStorage.getItem('i18nextLng') || 'pl',
   fallbackLng: 'en',
   interpolation: {
     escapeValue: false,
   },
+});
+
+i18n.on('languageChanged', (lng) => {
+  localStorage.setItem('i18nextLng', lng);
 });
 
 export default i18n;

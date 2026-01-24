@@ -18,13 +18,13 @@ namespace GFlow.Domain.Services.TieBreakers
                 if (opponentEntry == null) continue;
 
                 var result = match.Result!;
-                // Jeśli wygraliśmy z tym przeciwnikiem
+                // If we won against this opponent
                 if ((match.PlayerHomeId == userId && result.ScoreA > result.ScoreB) ||
                     (match.PlayerAwayId == userId && result.ScoreB > result.ScoreA))
                 {
                     score += opponentEntry.Points;
                 }
-                // Jeśli zremisowaliśmy
+                // If we drew
                 else if (result.ScoreA == result.ScoreB)
                 {
                     score += (opponentEntry.Points * 0.5);

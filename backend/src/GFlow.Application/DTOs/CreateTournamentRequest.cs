@@ -10,5 +10,18 @@ namespace GFlow.Application.DTOs
         public int MaxParticipants {get; set;}
         public DateTime StartDate {get; set;}
         public DateTime EndDate {get; set;}
+        
+        // Location Details
+        public string? CountryCode { get; set; }
+        public string? City { get; set; }
+        public string? Address { get; set; }
+        public double? Lat { get; set; }
+        public double? Lng { get; set; }
+
+        // Game Details
+        public string? GameCode { get; set; }
+        public string? GameName { get; set; }
+
+        public string Emblem {get; set;}
     }
 }

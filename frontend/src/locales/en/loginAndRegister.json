@@ -1,12 +1,20 @@
 {
   "titleLogin": "Login",
   "titleRegister": "Register Page",
+  "welcomeBack": "Welcome back! Please enter your details.",
+  "joinUs": "Create an account and join the tournaments.",
   "login": "Username",
+  "email": "Email",
   "or": "or",
   "password": "Password",
   "buttonLogin": "Sign in",
   "buttonRegister": "Register",
   "retype": "Re-type",
   "forgotPassword": "Forgot password?",
-  "createAccount": "Create an account"
+  "createAccount": "Create an account",
+  "noAccount": "Don't have an account?",
+  "hasAccount": "Already have an account?",
+  "passwordsMismatch": "Passwords do not match!",
+  "usernamePlaceholder": "username",
+  "emailPlaceholder": "your@email.com"
 }

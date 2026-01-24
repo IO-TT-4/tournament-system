@@ -8,6 +8,8 @@
       "myprofile": "My profile",
       "settings": "Settings",
       "logout": "Logout"
-    }
+    },
+    "tournaments": "Tournaments",
+    "logoAlt": "G-Flow Logo"
   }
 }

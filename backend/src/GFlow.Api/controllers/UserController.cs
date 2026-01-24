@@ -39,5 +39,12 @@ namespace GFlow.Api.Controllers
             });
         }
 
+        [HttpGet]
+        public async Task<IActionResult> GetAll()
+        {
+            var users = await _userService.GetAllUsers();
+            return Ok(users);
+        }   
+
     }
 }

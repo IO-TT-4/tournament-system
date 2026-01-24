@@ -15,6 +15,7 @@ namespace GFlow.Application.Services
         }
 
         public async Task<User?> GetUser(string id) => await _userRepo.Get(id);
+        public async Task<IEnumerable<User>> GetAllUsers() => await _userRepo.GetAll();
 
     }
 }

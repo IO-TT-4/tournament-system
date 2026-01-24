@@ -35,7 +35,8 @@ namespace GFlow.Api.Controllers
                 id=authResponse.Id,
                 username=authResponse.Username,
                 email=authResponse.Email,
-                token=authResponse.Token
+                token=authResponse.Token,
+                refreshToken=authResponse.RefreshToken
             });
         }
 
@@ -54,7 +55,28 @@ namespace GFlow.Api.Controllers
                 id=authResponse.Id,
                 username=authResponse.Username,
                 email=authResponse.Email,
-                token=authResponse.Token
+                token=authResponse.Token,
+                refreshToken=authResponse.RefreshToken
+            });
+        }
+
+        [HttpPost("refresh")]
+        public async Task<IActionResult> Refresh([FromBody] RefreshTokenRequest request)
+        {
+            AuthResponse? authResponse = await _authService.RefreshToken(request.RefreshToken);
+
+            if (authResponse is null)
+            {
+                return Unauthorized(new { code = "INVALID_REFRESH_TOKEN" });
+            }
+
+            return Ok(new
+            {
+                id = authResponse.Id,
+                username = authResponse.Username,
+                email = authResponse.Email,
+                token = authResponse.Token,
+                refreshToken = authResponse.RefreshToken
             });
         }
     }

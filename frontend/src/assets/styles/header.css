@@ -1,0 +1,119 @@
+@import url('./colors.css');
+
+header {
+  width: 100%;
+  padding: 0 60px; /* Większy margines boczny */
+  display: flex;
+  justify-content: space-between; /* Rozsuwa elementy na boki */
+  align-items: center;
+  height: 80px; /* Nieco niższy, bardziej smukły */
+  position: fixed; /* Header zawsze na górze przy przewijaniu */
+  top: 0;
+  z-index: 1000;
+
+  /* Efekt szklany */
+  background: rgba(13, 17, 23, 0.5);
+  backdrop-filter: blur(15px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+header a {
+  text-decoration: none;
+  color: var(--text-primary);
+  transition: 0.5s ease-in-out;
+}
+
+header .logo {
+  position: absolute;
+  left: 0%;
+  top: 50%;
+  transform: translate(16px, -50%);
+}
+
+header .logo a {
+  font-size: 3rem;
+  font-weight: bold;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 10px;
+  color: var(--text-primary);
+}
+
+header .logo a img {
+  height: 64px;
+  width: auto;
+}
+
+header .logo a:hover {
+  opacity: 0.8;
+}
+
+header nav {
+  margin-left: auto;
+}
+
+header nav ul {
+  list-style: none;
+  display: flex;
+  flex-direction: row;
+  gap: 30px;
+  font-size: 1.2rem;
+}
+
+header nav ul li a:hover {
+  opacity: 0.8;
+}
+
+header nav .navBtn {
+  background: var(--accent-warning);
+  color: var(--background);
+  padding: 10px 24px;
+  border-radius: 4px;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  transition: transform 0.2s ease;
+}
+
+header nav .navBtn:hover {
+  transform: translateY(-2px);
+  opacity: 1; /* Resetujemy Twoje hover:opacity */
+}
+
+/* Poprawka kłódki, by była czarna na złotym tle przycisku */
+header nav .navBtn::after {
+  filter: brightness(0);
+}
+
+header nav .logoutBtn {
+  background: var(--accent-error);
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+header nav .user-info {
+  display: flex;
+  align-items: center;
+  color: var(--text-primary);
+  font-weight: 500;
+}
+
+header nav .lang-switcher {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: var(--text-primary);
+  padding: 6px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  min-width: 45px;
+}
+
+header nav .lang-switcher:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: var(--accent-warning);
+}

@@ -3,7 +3,59 @@
   "description": "Uniwersalna platforma do tworzenia i śledzenia różnych typów turniejów, np. e-sportowych lub planszowych. System musi umożliwiać dodawanie uczestników (zarówno indywidualnych, jak i drużynowych), a następnie automatyczne generowanie drabinek turniejowych w różnych systemach. Kluczowe będzie wizualizowanie drabinek oraz aktualizacja i prezentacja wyników. System przechowuje również dane historyczne.",
   "currentTournaments": "Aktualne turnieje",
   "futureTournaments": "Nadchodzące turnieje",
+  "allTournaments": "Wszystkie Turnieje",
+  "browseTournaments": "Przeglądaj i dołączaj do aktywnych turniejów w różnych grach",
+  "searchTournaments": "Szukaj turniejów...",
+  "noTournamentsFound": "Nie znaleziono turniejów",
+  "tryChangingCriteria": "Spróbuj zmienić kryteria wyszukiwania",
+  "startDate": "Data rozpoczęcia",
+  "details": "Szczegóły",
+  "comingSoon": "Wkrótce",
+  "active": "Aktywny",
+  "completed": "Zakończony",
   "date": "Data",
-  "rounds": "Rundy",
-  "NoPlayers": "Graczy"
+  "rounds": "rundy",
+  "NoPlayers": "Graczy",
+  "location": "Lokalizacja",
+  "cityOrCountry": "Miasto lub kraj",
+  "distance": "Odległość",
+  "radius": "Promień",
+  "km": "km",
+  "loadMore": "Załaduj więcej",
+  "filterByGame": "Dyscyplina",
+  "all": "Wszystkie",
+  "status": "Status",
+  "sortBy": "Sortuj według",
+  "dateAsc": "Data: rosnąco",
+  "dateDesc": "Data: malejąco",
+  "clearFilters": "Wyczyść filtry",
+  "showingResults": "Pokazano {{count}} z {{total}} turniejów",
+  "games": {
+    "chess": "Szachy",
+    "cs2": "Counter-Strike 2",
+    "lol": "League of Legends",
+    "homm3": "Heroes III",
+    "wot": "World of Tanks",
+    "volleyball": "Siatkówka",
+    "football": "Piłka Nożna",
+    "poker": "Poker"
+  },
+  "tournamentDetails": {
+    "rounds": "rundy",
+    "tryb": "TRYB",
+    "format": "FORMAT"
+  },
+  "notFound": {
+    "title": "Strona nie znaleziona",
+    "message": "Przepraszamy, ale strona której szukasz nie istnieje lub została przeniesiona. Sprawdź adres URL lub wróć na stronę główną.",
+    "backHome": "Powrót do strony głównej"
+  },
+  "tournamentsData": {
+    "warsaw-chess": "Grandmaster Chess Warszawa",
+    "berlin-cs2": "Berlin Master League",
+    "online-lol": "Summoner's Rift Global",
+    "warsaw-volleyball": "Amatorski Turniej Siatkówki",
+    "krakow-football": "Puchar Krakowa",
+    "online-poker": "Texas Holdem Night"
+  }
 }

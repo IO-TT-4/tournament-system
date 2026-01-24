@@ -5,6 +5,7 @@ namespace GFlow.Application.Ports
 {
     public interface IUserService
     {
-        public Task<User> GetUser(string id);
+        public Task<User?> GetUser(string id);
+        public Task<IEnumerable<User>> GetAllUsers();
     }
 }

@@ -14,5 +14,28 @@ namespace GFlow.Domain.Entities
     public string? OrganizerId { get; set; }
     public User Organizer { get; set; } = null!;
     public List<User> Participants { get; set; } = new();
+    public List<User> Moderators { get; set; } = new();
+    
+    /// <summary>
+    /// How players should be seeded/paired in the first round (Swiss/Elimination).
+    /// </summary>
+    public SeedingType SeedingType { get; set; } = SeedingType.Random;
+    
+    // Location Details
+    public string? CountryCode { get; set; }
+    public string? City { get; set; }
+    public string? Address { get; set; }
+    public double? Lat { get; set; }
+    public double? Lng { get; set; }
+
+    // Game Details (to match frontend)
+    public string? GameCode { get; set; }
+    public string? GameName { get; set; }
+    public string? Emblem { get; set; }
+
+    // Statistics
+    public long ViewCount { get; set; }
 }
+
+
 }

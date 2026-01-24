@@ -11,7 +11,7 @@ namespace GFlow.Domain.Services
             List<Match> matches, 
             List<ITieBreaker> tieBreakerPriority)
         {
-            // KROK 1: Oblicz punkty główne dla każdego
+            // STEP 1: Calculate main points for each participant
             var standings = participants.Select(p => new StandingsEntry
             {
                 UserId = p.UserId,
@@ -21,8 +21,8 @@ namespace GFlow.Domain.Services
                             m.PlayerAwayId == p.UserId ? (m.Result?.ScoreB ?? 0) : 0)
             }).ToList();
 
-            // KROK 2: Oblicz wartości tie-breakerów
-            // Ważne: DirectEncounter potrzebuje już obliczonych Points w standings!
+            // STEP 2: Calculate tie-breaker values
+            // Important: DirectEncounter needs already calculated Points in standings!
             foreach (var entry in standings)
             {
                 foreach (var tb in tieBreakerPriority)
@@ -31,7 +31,7 @@ namespace GFlow.Domain.Services
                 }
             }
 
-            // KROK 3: Kaskadowe sortowanie
+            // STEP 3: Cascading sort
             var query = standings.OrderByDescending(s => s.Points);
 
             foreach (var tb in tieBreakerPriority)
@@ -41,7 +41,7 @@ namespace GFlow.Domain.Services
 
             var finalStandings = query.ToList();
 
-            // KROK 4: Przypisanie pozycji (obsługa ex-aequo)
+            // STEP 4: Assign positions (handling ex-aequo)
             for (int i = 0; i < finalStandings.Count; i++)
             {
                 finalStandings[i].Position = i + 1;

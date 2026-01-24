@@ -3,6 +3,7 @@
   "serverError": "Server error occured",
   "loginSuccess": "Login Success",
   "logoutSuccess": "Logout Success",
+  "registerSuccess": "Account created successfully",
   "InvalidCredentials": "Invalid credentials",
   "passwordNotMatch": "Passwords don't match"
 }

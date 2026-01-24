@@ -13,9 +13,20 @@ namespace GFlow.Infrastructure.Persistance
         public DbSet<Match> Matches => Set<Match>();
 
         public DbSet<TournamentParticipant> TournamentParticipants => Set<TournamentParticipant>();
+        
+        public DbSet<MatchEvent> MatchEvents => Set<MatchEvent>();
+        public DbSet<UserActivity> UserActivities => Set<UserActivity>();
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            // UserActivity configuration
+            modelBuilder.Entity<UserActivity>(entity =>
+            {
+                entity.HasKey(a => a.Id);
+                entity.HasOne(a => a.User).WithMany().HasForeignKey(a => a.UserId);
+                entity.HasOne(a => a.Tournament).WithMany().HasForeignKey(a => a.TournamentId);
+            });
+
             // 1. Relacja Organizator - Turnieje
             modelBuilder.Entity<Tournament>()
                 .HasOne(t => t.Organizer)
@@ -26,6 +37,12 @@ namespace GFlow.Infrastructure.Persistance
             modelBuilder.Entity<Tournament>()
                 .HasMany(t => t.Participants)
                 .WithMany(u => u.ParticipatedTournaments);
+
+            // 3. Many-to-Many: Moderatorzy (bez nawigacji zwrotnej w User, lub można dodać)
+            modelBuilder.Entity<Tournament>()
+                 .HasMany(t => t.Moderators)
+                 .WithMany()
+                 .UsingEntity(j => j.ToTable("TournamentModerators"));
 
             // W AppDbContext.cs
             
@@ -69,6 +86,22 @@ namespace GFlow.Infrastructure.Persistance
                           .HasColumnName("FinishType")
                           .HasConversion<string>();
                 });
+            });
+
+            // 5. Konfiguracja MatchEvent
+            modelBuilder.Entity<MatchEvent>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                
+                entity.HasOne<Match>()
+                    .WithMany(m => m.Events)
+                    .HasForeignKey(e => e.MatchId)
+                    .OnDelete(DeleteBehavior.Cascade);
+                    
+                entity.HasOne<User>()
+                    .WithMany()
+                    .HasForeignKey(e => e.RecordedBy)
+                    .OnDelete(DeleteBehavior.Restrict);
             });
 
             base.OnModelCreating(modelBuilder);

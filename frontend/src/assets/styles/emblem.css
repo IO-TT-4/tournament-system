@@ -1,0 +1,155 @@
+.emblem {
+  height: 60vh;
+  width: calc(80vh / 1.357);
+  flex-shrink: 0;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding-bottom: 45px;
+  text-align: center;
+  position: relative;
+  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1); /* Płynniejsza animacja */
+  filter: grayscale(0.5) blur(2px); /* Nieaktywne są lekko szare i rozmyte */
+  opacity: 0.6;
+  transform: scale(0.8); /* Mniejsze na starcie */
+  cursor: pointer;
+  margin: 0 -50px; /* Ujemny margines sprawi, że karty będą na siebie lekko nachodzić, co wygląda pro */
+  z-index: 1;
+}
+
+.emblem.active {
+  transform: scale(1.15);
+  filter: grayscale(0) blur(0);
+  opacity: 1;
+  z-index: 10; /* Musi być nad innymi */
+}
+
+.emblem.inactive {
+  transform: scale(0.8);
+  opacity: 0.5;
+  /* Możesz dodać lekkie przesunięcie w bok, by bardziej wyeksponować środek */
+}
+
+.emblem:hover {
+  transform: scale(1.08);
+}
+
+.emblem.inactive:hover {
+  opacity: 0.9;
+  transform: scale(0.85);
+}
+
+.emblem .text-container {
+  width: 80%;
+  z-index: 2;
+}
+
+.emblem .mask-layer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  -webkit-mask-size: contain;
+  mask-size: contain;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
+  z-index: -1;
+}
+
+.emblem.default .mask-layer {
+  background: linear-gradient(135deg, #333, #111);
+  clip-path: polygon(10% 0%, 100% 0%, 90% 100%, 0% 100%);
+}
+
+.emblem.chess-pawn .mask-layer {
+  background: linear-gradient(135deg, #4b3018, #1a0f00);
+  -webkit-mask-image: url('data:image/svg+xml;utf8,<svg version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 297 297" style="enable-background:new 0 0 297 297;" xml:space="preserve"><g><path d="M223.333,247h-5.926c2.607-3.811,10.798-18.024-0.727-32.248c-13.334-16.46-39.863-65.748-27.324-98.752h0.977 c4.418,0,7.667-3.582,7.667-8v-1c0-4.418-3.249-8-7.667-8h-1.225c10.917-10.466,17.725-25.184,17.725-41.5 c0-31.756-25.744-57.5-57.5-57.5s-57.5,25.744-57.5,57.5c0,16.316,6.808,31.034,17.725,41.5h-2.225c-4.418,0-8.333,3.582-8.333,8v1 c0,4.418,3.915,8,8.333,8h1.979c12.539,33.004-13.99,82.292-27.324,98.752c-11.524,14.224-3.334,28.437-0.727,32.248h-6.928	c-4.418,0-8.333,3.582-8.333,8v18c0,4.418,3.915,8,8.333,8H75v16h148v-16c5,0,8-3.582,8-8v-18C231,250.582,227.751,247,223.333,247 z"/></g></svg>');
+  mask-image: url('data:image/svg+xml;utf8,<svg version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 297 297" style="enable-background:new 0 0 297 297;" xml:space="preserve"><g><path d="M223.333,247h-5.926c2.607-3.811,10.798-18.024-0.727-32.248c-13.334-16.46-39.863-65.748-27.324-98.752h0.977 c4.418,0,7.667-3.582,7.667-8v-1c0-4.418-3.249-8-7.667-8h-1.225c10.917-10.466,17.725-25.184,17.725-41.5 c0-31.756-25.744-57.5-57.5-57.5s-57.5,25.744-57.5,57.5c0,16.316,6.808,31.034,17.725,41.5h-2.225c-4.418,0-8.333,3.582-8.333,8v1 c0,4.418,3.915,8,8.333,8h1.979c12.539,33.004-13.99,82.292-27.324,98.752c-11.524,14.224-3.334,28.437-0.727,32.248h-6.928	c-4.418,0-8.333,3.582-8.333,8v18c0,4.418,3.915,8,8.333,8H75v16h148v-16c5,0,8-3.582,8-8v-18C231,250.582,227.751,247,223.333,247 z"/></g></svg>');
+
+  -webkit-mask-size: cover;
+  mask-size: cover;
+}
+
+/* .emblem.chess-pawn {
+  justify-content: flex-end;
+} */
+
+.emblem.diamond .mask-layer {
+  background: linear-gradient(135deg, #2c3e50, #000000);
+  clip-path: polygon(0% 15%, 85% 0%, 100% 85%, 15% 100%);
+  border-bottom: 32px solid #f39c12;
+}
+
+.emblem.shield .mask-layer {
+  background: linear-gradient(135deg, #1e3a8a, #0f172a);
+
+  -webkit-mask-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" preserveAspectRatio="none"><path d="M0 0 h100 v60 C100 85 50 100 50 100 C50 100 0 85 0 60 Z"/></svg>');
+  mask-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" preserveAspectRatio="none"><path d="M0 0 h100 v60 C100 85 50 100 50 100 C50 100 0 85 0 60 Z"/></svg>');
+
+  -webkit-mask-size: 100% 100%;
+  mask-size: 100% 100%;
+
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+}
+
+.emblem .title {
+  font-size: 2rem;
+  font-weight: 900;
+  margin-bottom: 10px;
+  color: var(--text-primary);
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+
+  letter-spacing: 3px;
+  font-family: 'Roboto', sans-serif;
+  font-size: 3.4rem;
+  font-weight: 900;
+  line-height: 1.4;
+  word-wrap: break-word;
+
+  text-shadow:
+    2px 2px 0 #000,
+    -2px 2px 0 #000,
+    2px -2px 0 #000,
+    -2px -2px 0 #000,
+    0px 2px 0 #000,
+    0px -2px 0 #000,
+    2px 0px 0 #000,
+    -2px 0px 0 #000;
+}
+
+.emblem .date {
+  font-size: 1.6rem;
+  color: var(--text-secondary);
+  opacity: 0.8;
+}
+
+.emblem .info {
+  color: var(--accent-warning);
+  font-weight: bold;
+  font-size: 1.8rem;
+  margin-top: 10px;
+}
+
+.emblem .game-name {
+  font-size: 1.6rem;
+  letter-spacing: 3px;
+  opacity: 0.6;
+  margin-bottom: 2px;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+}
+
+.emblem .location-name {
+  font-size: 1.4rem;
+  color: var(--accent-warning);
+  opacity: 0.8;
+  margin-bottom: 10px;
+  font-weight: 500;
+}

@@ -3,25 +3,29 @@ using GFlow.Domain.ValueObjects;
 
 namespace GFlow.Domain.Services.Pairings
 {
-    class SingleRoundRobinStrategy : IPairingStrategy
+    public class SingleRoundRobinStrategy : IPairingStrategy
     {
-        public IEnumerable<Match> GenerateNextRound(string tournamentId, List<TournamentParticipant> participants, List<Match> existingMatches)
+        public IEnumerable<Match> GenerateNextRound(Tournament tournament, List<TournamentParticipant> participants, List<Match> existingMatches)
     {
-        // 1. Sprawdź, czy jakakolwiek runda została już wygenerowana
+        string tournamentId = tournament.Id;
+        // 1. Check if any round has already been generated
         if (existingMatches.Any())
         {
-            // W Round Robin zazwyczaj generujemy wszystko na starcie.
-            // Jeśli baza nie jest pusta, oznacza to, że rundy już istnieją.
+            // In Round Robin we usually generate everything at the start.
+            // If DB is not empty, it means rounds already exist.
             return Enumerable.Empty<Match>();
         }
 
         var allMatches = new List<Match>();
-        var players = participants.OrderBy(p => p.Ranking).ToList();
+        var players = participants
+            .Where(p => !p.IsWithdrawn)
+            .OrderBy(p => p.Ranking)
+            .ToList();
 
-        // 2. Obsługa nieparzystej liczby graczy (Duch/BYE)
+        // 2. Odd number of players handling (Ghost/BYE)
         if (players.Count % 2 != 0)
         {
-            // Dodajemy "pustego" gracza, aby wyrównać do pary
+            // Add "empty" player to even out the pair
             players.Add(new TournamentParticipant(Guid.Empty.ToString()));
         }
 
@@ -29,7 +33,7 @@ namespace GFlow.Domain.Services.Pairings
         int totalRounds = playerCount - 1;
         int matchesPerRound = playerCount / 2;
 
-        // 3. Algorytm Rotacji (Circle Method)
+        // 3. Rotation Algorithm (Circle Method)
         for (int round = 1; round <= totalRounds; round++)
         {
             for (int i = 0; i < matchesPerRound; i++)
@@ -37,10 +41,10 @@ namespace GFlow.Domain.Services.Pairings
                 var home = players[i];
                 var away = players[playerCount - 1 - i];
 
-                // Pomin mecz, jeśli jeden z graczy to "Duch" (BYE)
+                // Skip match if one of the players is "Ghost" (BYE)
                 if (home.UserId != Guid.Empty.ToString() && away.UserId != Guid.Empty.ToString())
                 {
-                    // Naprzemienne przypisywanie ról Home/Away dla balansu
+                    // Alternating Home/Away role assignment for balance
                     var match = (round + i) % 2 == 0 
                         ? new Match(tournamentId, home.UserId, away.UserId, round, tournamentId)
                         : new Match(tournamentId, away.UserId, home.UserId, round, tournamentId);
@@ -49,7 +53,7 @@ namespace GFlow.Domain.Services.Pairings
                 }
                 else
                 {
-                    // Opcjonalnie: Możesz zapisać mecz BYE w bazie z gotowym wynikiem
+                    // Optional: You can save the BYE match in the database with a ready result
                     var byePlayerId = home.UserId == Guid.Empty.ToString() ? away.UserId : home.UserId;
                     var byeMatch = new Match(tournamentId, byePlayerId, Guid.Empty.ToString(), round, tournamentId);
                     byeMatch.SetResult(MatchResult.CreateBye());
@@ -57,8 +61,8 @@ namespace GFlow.Domain.Services.Pairings
                 }
             }
 
-            // Rotacja: Stały pierwszy element, reszta przesuwa się w prawo
-            // Przykład dla 4 graczy: 
+            // Rotation: Fixed first element, rest shifts right
+            // Example for 4 players: 
             // R1: (1,4) (2,3) -> R2: (1,3) (4,2) -> R3: (1,2) (3,4)
             var lastPlayer = players[^1];
             players.RemoveAt(players.Count - 1);

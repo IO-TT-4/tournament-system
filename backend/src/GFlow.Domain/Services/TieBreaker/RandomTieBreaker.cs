@@ -8,7 +8,7 @@ namespace GFlow.Domain.Services.TieBreakers
         public string Name => "Random Draw";
         public double Calculate(string userId, List<Match> allMatches, List<StandingsEntry> currentStandings)
         {
-            // Używamy HashCode z ID, aby wynik był stały dla tego samego usera w danym momencie
+            // Use HashCode from ID so the result is consistent for the same user at a given moment
             return userId.GetHashCode();
         }
     }

@@ -14,7 +14,7 @@ namespace GFlow.Domain.Services.Pairings
             _totalRounds = totalRounds;
         }
        public IEnumerable<Match> GenerateNextRound(
-            string tournamentId, 
+            Tournament tournament, 
             List<TournamentParticipant> participants, 
             List<Match> existingMatches)
         {
@@ -22,72 +22,118 @@ namespace GFlow.Domain.Services.Pairings
             UpdateParticipantsData(participants, existingMatches);
             
             var matches = new List<Match>();
+
+            // Filter out participants who should not be paired in this round
+            var activeParticipants = participants
+                .Where(p => !p.IsWithdrawn && !p.UnavailableRounds.Contains(nextRoundNumber))
+                .ToList();
             
-            // Specjalne kojarzenie dla rundy 1 (Zasada 1 - pierwsza runda)
+            // Special pairing for round 1 (Rule 1 - first round)
             if (nextRoundNumber == 1)
             {
-                return GenerateFirstRound(tournamentId, participants);
+                return GenerateFirstRound(tournament, activeParticipants);
             }
             
-            // Sortowanie według punktów i rankingu
-            var sortedPlayers = participants
+            // Sort by score and ranking
+            var sortedPlayers = activeParticipants
                 .OrderByDescending(p => p.Score)
                 .ThenByDescending(p => p.Ranking)
                 .ToList();
 
-            // Obsługa BYE (Zasada 2)
+            // BYE Handling (Rule 2)
             if (sortedPlayers.Count % 2 != 0)
             {
                 var byeCandidate = sortedPlayers
                     .OrderBy(p => p.Score)
                     .First(p => !p.HasReceivedBye);
                     
-                var byeMatch = new Match(tournamentId, byeCandidate.UserId, Guid.Empty.ToString(), nextRoundNumber, tournamentId);
+                var byeMatch = new Match(tournament.Id, byeCandidate.UserId, Guid.Empty.ToString(), nextRoundNumber, tournament.Id);
                 byeMatch.SetResult(MatchResult.CreateBye());
                 matches.Add(byeMatch);
                 sortedPlayers.Remove(byeCandidate);
             }
 
-            // Kojarzenie w obrębie grup punktowych (Zasada 4)
-            if (SolvePairingWithScoreGroups(sortedPlayers, matches, tournamentId, nextRoundNumber))
+            // Pairing within score groups (Rule 4)
+            if (SolvePairingWithScoreGroups(sortedPlayers, matches, tournament.Id, nextRoundNumber))
             {
                 return matches;
             }
 
-            throw new Exception("Nie można wygenerować poprawnego kojarzenia zgodnego z zasadami systemu szwajcarskiego.");
+            throw new Exception("Cannot generate valid pairing consistent with Swiss system rules.");
         }
 
-        private IEnumerable<Match> GenerateFirstRound(string tournamentId, List<TournamentParticipant> participants)
+        private IEnumerable<Match> GenerateFirstRound(Tournament tournament, List<TournamentParticipant> participants)
         {
             var matches = new List<Match>();
-            var sorted = participants.OrderByDescending(p => p.Ranking).ToList();
             
-            // Obsługa BYE dla nieparzystej liczby
+            List<TournamentParticipant> sorted;
+            
+            switch (tournament.SeedingType)
+            {
+                case SeedingType.Random:
+                    // Random shuffle for everyone (ignore ranking)
+                     sorted = participants
+                        .Select(p => new { Player = p, ShuffleKey = Guid.NewGuid() })
+                        .OrderBy(x => x.ShuffleKey)
+                        .Select(x => x.Player)
+                        .ToList();
+                    break;
+                    
+                case SeedingType.Alphabetical:
+                     // We don't have name in Participant, but we can try to look it up if we had User objects. 
+                     // Since Participant only has UserId, Score, Ranking... we might need to assume Ranking implies order?
+                     // Wait, Participant DOES NOT have name. But the prompt asked for alphabetical.
+                     // IMPORTANT: Current entities logic separates User and Participant.
+                     // The user said "Alphabetical". Without User names here, we can't do it strictly unless we fetch users.
+                     // However, passing `Tournament` gives us `Participants` (List<User>).
+                     // We can map UserId to User.Name.
+                     
+                     var userMap = tournament.Participants.ToDictionary(u => u.Id, u => u.Username);
+                     
+                     sorted = participants
+                        .OrderBy(p => userMap.GetValueOrDefault(p.UserId) ?? p.UserId)
+                        .ToList();
+                    break;
+
+                case SeedingType.Ranking:
+                default:
+                    // Standard Swiss: Sort by Ranking descending.
+                    // If rankings are equal, shuffle loosely to avoid strict ID ordering.
+                    sorted = participants
+                        .Select(p => new { Player = p, ShuffleKey = Guid.NewGuid() })
+                        .OrderByDescending(x => x.Player.Ranking)
+                        .ThenBy(x => x.ShuffleKey)
+                        .Select(x => x.Player)
+                        .ToList();
+                    break;
+            }
+            
+            // BYE handling for odd number
             if (sorted.Count % 2 != 0)
             {
                 var lowest = sorted.Last();
-                var byeMatch = new Match(tournamentId, lowest.UserId, Guid.Empty.ToString(), 1, tournamentId);
+                var byeMatch = new Match(tournament.Id, lowest.UserId, Guid.Empty.ToString(), 1, tournament.Id);
                 byeMatch.SetResult(MatchResult.CreateBye());
                 matches.Add(byeMatch);
                 sorted.Remove(lowest);
             }
             
-            // Podział na dwie połowy
+            // Split into two halves
             int halfSize = sorted.Count / 2;
             var upperHalf = sorted.Take(halfSize).ToList();
             var lowerHalf = sorted.Skip(halfSize).ToList();
             
-            // Losowanie pierwszej pozycji dla pierwszej pary
-            var random = new Random();
-            bool firstPlayerHome = random.Next(2) == 0;
-            
-            // Kojarzenie: górna połowa z dolną
+            // Pairing: upper half with lower half
+            // Rule: Upper half players with EVEN seeding (1-based index) play AWAY
             for (int i = 0; i < upperHalf.Count; i++)
             {
-                var match = new Match(tournamentId, Guid.Empty.ToString(), Guid.Empty.ToString(), 1, tournamentId);
+                var match = new Match(tournament.Id, Guid.Empty.ToString(), Guid.Empty.ToString(), 1, tournament.Id);
                 
-                // Alternacja pozycji po pierwszej parze
-                bool upperPlayerHome = (i == 0) ? firstPlayerHome : !matches.Last().IsPlayerHome(upperHalf[i - 1].UserId);
+                // Seeding number (1-based): i + 1
+                // If seeding is even -> upper player plays Away
+                // If seeding is odd -> upper player plays Home
+                int seedingNumber = i + 1;
+                bool upperPlayerHome = (seedingNumber % 2 != 0); // Odd seeding -> Home
                 
                 if (upperPlayerHome)
                 {
@@ -112,7 +158,7 @@ namespace GFlow.Domain.Services.Pairings
             string tId, 
             int round)
         {
-            // Grupowanie według punktów (Zasada 4)
+            // Grouping by score (Rule 4)
             var scoreGroups = players
                 .GroupBy(p => p.Score)
                 .OrderByDescending(g => g.Key)
@@ -126,14 +172,14 @@ namespace GFlow.Domain.Services.Pairings
                 var currentPool = unpaired.Concat(group).ToList();
                 unpaired.Clear();
                 
-                // Próba parowania w obrębie grupy + floaters
+                // Attempt pairing within group + floaters
                 if (!SolvePairingInPool(currentPool, result, unpaired, tId, round))
                 {
                     return false;
                 }
             }
             
-            // Sprawdzenie czy wszyscy zostali sparowani
+            // Check if everyone is paired
             return unpaired.Count == 0;
         }
 

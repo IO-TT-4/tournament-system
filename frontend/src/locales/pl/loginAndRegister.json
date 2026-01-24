@@ -1,12 +1,20 @@
 {
   "titleLogin": "Strona Logowania",
   "titleRegister": "Strona Rejestracji",
+  "welcomeBack": "Witaj ponownie! Zaloguj się do swojego konta.",
+  "joinUs": "Stwórz nowe konto i dołącz do turniejów.",
   "login": "Nazwa użytkownika",
+  "email": "Email",
   "or": "lub",
   "password": "Hasło",
   "buttonLogin": "Zaloguj się",
   "buttonRegister": "Zarejestruj się",
   "retype": "Powtórz",
   "forgotPassword": "Zapomniałeś hasła?",
-  "createAccount": "Stwórz konto"
+  "createAccount": "Stwórz konto",
+  "noAccount": "Nie masz konta?",
+  "hasAccount": "Masz już konto?",
+  "passwordsMismatch": "Hasła nie są identyczne!",
+  "usernamePlaceholder": "nazwa_uzytkownika",
+  "emailPlaceholder": "twoj@email.com"
 }

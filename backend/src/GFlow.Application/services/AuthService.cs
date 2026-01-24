@@ -24,7 +24,7 @@ namespace GFlow.Application.Services
             _tokenProvider = tokenProvider;
         }
 
-        public async Task<AuthResponse> Login(LoginRequest request)
+        public async Task<AuthResponse?> Login(LoginRequest request)
         {
             var user = await _userRepo.GetByUsername(request.username);
             if (user == null) return null;
@@ -32,22 +32,29 @@ namespace GFlow.Application.Services
             bool isPasswordValid = _passwordHasher.VerifyPassword(request.password, user.PasswordHash);
             if (!isPasswordValid) return null;
 
-            user.Token = _tokenProvider.GenerateToken(user.Id, user.Username);
+            string accessToken = _tokenProvider.GenerateToken(user.Id, user.Username);
+            string refreshToken = _tokenProvider.GenerateRefreshToken();
+
+            user.RefreshToken = refreshToken;
+            user.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(7);
             
+            await _userRepo.Update(user);
+
             AuthResponse response = new AuthResponse
             {
                 Id = user.Id,
                 Username = user.Username,
-                Email = user.Email,
-                Token = user.Token
+                Email = user.Email ?? string.Empty,
+                Token = accessToken,
+                RefreshToken = refreshToken
             };
 
             return response;
         }
 
-        public async Task<AuthResponse> RegisterUser(RegisterRequest request)
+        public async Task<AuthResponse?> RegisterUser(RegisterRequest request)
         {
-            // 4. Walidacja podstawowa
+            // 4. Basic validation
             if (string.IsNullOrWhiteSpace(request.email) || 
                 string.IsNullOrWhiteSpace(request.username) || 
                 string.IsNullOrWhiteSpace(request.password))
@@ -57,14 +64,14 @@ namespace GFlow.Application.Services
 
             if (request.username.Length < 3) return null;
 
-            // 5. Sprawdzenie formatu email
+            // 5. Check email format
             if (!EmailRegex.IsMatch(request.email)) return null;
 
-            // 6. Sprawdzenie czy użytkownik już istnieje (Unikalność)
+            // 6. Check if user already exists (Uniqueness)
             var existingUser = await _userRepo.GetByUsername(request.username);
             if (existingUser != null) return null;
 
-            // 7. Haszowanie hasła
+            // 7. Password hashing
             string passwordHash = _passwordHasher.HashPassword(request.password);
 
             var user = new User
@@ -74,22 +81,55 @@ namespace GFlow.Application.Services
                 PasswordHash = passwordHash
             };
 
-            // 8. Zapis do bazy
+            // 8. Save to database
             var createdUser = await _userRepo.Add(user);
             if (createdUser == null) return null;
 
-            // 9. Generowanie tokenu dla nowo zarejestrowanego użytkownika
-            createdUser.Token = _tokenProvider.GenerateToken(createdUser.Id, createdUser.Username);
+            // 9. Generate token for newly registered user
+            string accessToken = _tokenProvider.GenerateToken(createdUser.Id, createdUser.Username);
+            string refreshToken = _tokenProvider.GenerateRefreshToken();
+
+            createdUser.RefreshToken = refreshToken;
+            createdUser.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(7);
+            
+            await _userRepo.Update(createdUser);
 
             AuthResponse response = new AuthResponse
             {
                 Id = createdUser.Id,
                 Username = createdUser.Username,
-                Email = createdUser.Email,
-                Token = createdUser.Token
+                Email = createdUser.Email ?? string.Empty,
+                Token = accessToken,
+                RefreshToken = refreshToken
             };
 
             return response;
+        }
+
+        public async Task<AuthResponse?> RefreshToken(string refreshToken)
+        {
+            var user = await _userRepo.GetByRefreshToken(refreshToken);
+            if (user == null || user.RefreshToken != refreshToken || user.RefreshTokenExpiryTime <= DateTime.UtcNow)
+            {
+                return null;
+            }
+
+            string newAccessToken = _tokenProvider.GenerateToken(user.Id, user.Username);
+            string newRefreshToken = _tokenProvider.GenerateRefreshToken();
+
+            user.RefreshToken = newRefreshToken;
+            user.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(7);
+
+            await _userRepo.Update(user);
+
+            return new AuthResponse
+            {
+                Id = user.Id,
+                Username = user.Username,
+                Email = user.Email ?? string.Empty,
+                Token = newAccessToken,
+                RefreshToken = newRefreshToken
+            };
         }
     }
 }

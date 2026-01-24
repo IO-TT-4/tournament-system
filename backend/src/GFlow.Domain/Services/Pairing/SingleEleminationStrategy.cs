@@ -5,42 +5,46 @@ namespace GFlow.Domain.Services.Pairings
 {
     public class SingleEleminationStrategy : IPairingStrategy
     {
-        public IEnumerable<Match> GenerateNextRound(string tournamentId, List<TournamentParticipant> participants, List<Match> existingMatches)
+        public IEnumerable<Match> GenerateNextRound(Tournament tournament, List<TournamentParticipant> participants, List<Match> existingMatches)
     {
-        // 1. Jeśli brak meczów -> Generujemy RUNDĘ 1 (Pierwsze piętro drabinki)
+        string tournamentId = tournament.Id;
+        // 1. If no matches -> Generate ROUND 1 (First bracket level)
         if (!existingMatches.Any())
         {
             return GenerateFirstRound(tournamentId, participants);
         }
 
-        // 2. Znajdź ostatnią rundę i sprawdź czy się zakończyła
+        // 2. Find last round and check if it is finished
         var lastRoundNumber = existingMatches.Max(m => m.RoundNumber);
         var lastRoundMatches = existingMatches.Where(m => m.RoundNumber == lastRoundNumber).ToList();
 
         if (lastRoundMatches.Any(m => !m.IsCompleted))
         {
-            return Enumerable.Empty<Match>(); // Czekamy na wyniki wszystkich meczów w rundzie
+            return Enumerable.Empty<Match>(); // Waiting for all match results in the round
         }
 
-        // 3. Pobierz zwycięzców poprzedniej rundy
+        // 3. Get winners from the previous round
         var winners = lastRoundMatches
-            .OrderBy(m => m.PositionInRound) // Ważne dla zachowania struktury drabinki
+            .OrderBy(m => m.PositionInRound) // Important for preserving bracket structure
             .Select(m => GetWinnerId(m))
             .ToList();
 
-        // Jeśli został tylko jeden zwycięzca, turniej się skończył
+        // If only one winner remaining, tournament is over
         if (winners.Count <= 1) return Enumerable.Empty<Match>();
 
-        // 4. Parujemy zwycięzców w kolejnej rundzie
+        // 4. Pair winners in the next round
         return GenerateSubsequentRound(tournamentId, winners, lastRoundNumber + 1);
     }
 
     private IEnumerable<Match> GenerateFirstRound(string tournamentId, List<TournamentParticipant> participants)
     {
-        var players = participants.OrderByDescending(p => p.Ranking).ToList();
+        var players = participants
+            .Where(p => !p.IsWithdrawn)
+            .OrderByDescending(p => p.Ranking)
+            .ToList();
         int playerCount = players.Count;
 
-        // Oblicz rozmiar drabinki (najbliższa potęga 2)
+        // Calculate bracket size (nearest power of 2)
         int bracketSize = 1;
         while (bracketSize < playerCount) bracketSize *= 2;
 
@@ -54,21 +58,21 @@ namespace GFlow.Domain.Services.Pairings
             var match = new Match(tournamentId, Guid.Empty.ToString(), Guid.Empty.ToString(), 1, tournamentId);
             match.PositionInRound = i + 1;
 
-            // Logika rozstawiania (Seeding)
-            // W profesjonalnych drabinkach paruje się najlepszego z najsłabszym (1 vs 16, 2 vs 15 itd.)
+            // Seeding logic
+            // In professional brackets, pair best with worst (1 vs 16, 2 vs 15 etc.)
             var home = players[i];
             var awayIndex = (bracketSize - 1) - i;
 
             if (awayIndex < playerCount)
             {
-                // Normalny mecz
+                // Normal match
                 var away = players[awayIndex];
                 match.PlayerHomeId = home.UserId;
                 match.PlayerAwayId = away.UserId;
             }
             else
             {
-                // BYE - gracz przechodzi automatycznie
+                // BYE - player advances automatically
                 match.PlayerHomeId = home.UserId;
                 match.PlayerAwayId = Guid.Empty.ToString();
                 match.SetResult(MatchResult.CreateBye());

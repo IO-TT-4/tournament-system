@@ -3,7 +3,7 @@ namespace GFlow.Domain.ValueObjects
     public class StandingsEntry
     {
         public int Position { get; set; }
-        public string UserId { get; set; }
+        public required string UserId { get; set; }
         public string UserName { get; set; } = string.Empty;
         public double Points { get; set; }
         

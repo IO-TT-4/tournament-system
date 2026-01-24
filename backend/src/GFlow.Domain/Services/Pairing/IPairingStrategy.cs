@@ -6,7 +6,7 @@ namespace GFlow.Domain.Services.Pairings
     public interface IPairingStrategy
     {
         IEnumerable<Match> GenerateNextRound(
-            string tournamentId, 
+            Tournament tournament, 
             List<TournamentParticipant> participants, 
             List<Match> existingMatches);
     }
