@@ -31,6 +31,11 @@ function Header() {
           </li>
           {isLoggedIn() ? (
             <>
+              <li>
+                <Link to="/create-tournament" className="navBtn">
+                  {t('menu.createTournament') || 'Create'}
+                </Link>
+              </li>
               <li className="user-info">
                 <span>{user?.username}</span>
               </li>

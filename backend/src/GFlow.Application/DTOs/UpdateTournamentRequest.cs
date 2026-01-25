@@ -8,5 +8,6 @@ namespace GFlow.Application.DTOs
         public DateTime? StartDate { get; set; }
         public DateTime? EndDate { get; set; }
         public int? PlayerLimit { get; set; }
+        public string? Emblem { get; set; }
     }
 }

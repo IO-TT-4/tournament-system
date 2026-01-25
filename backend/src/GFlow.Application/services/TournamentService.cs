@@ -61,17 +61,37 @@ namespace GFlow.Application.Services
                 Status = Domain.ValueObjects.TournamentStatus.CREATED,
                 StartDate = DateTime.SpecifyKind(request.StartDate, DateTimeKind.Utc),
                 EndDate = DateTime.SpecifyKind(request.EndDate, DateTimeKind.Utc),
+                Description = request.Description,
+                NumberOfRounds = request.NumberOfRounds,
 
                 
                 // New Fields Mapping
                 CountryCode = request.CountryCode,
                 City = request.City,
                 Address = request.Address,
-                Lat = request.Lat,
-                Lng = request.Lng,
                 GameCode = request.GameCode,
-                GameName = request.GameName
+                GameName = request.GameName,
+                Emblem = request.Emblem
             };
+
+            // Geocoding Logic
+            if (!string.IsNullOrEmpty(request.City) && !request.City.Equals("Online", StringComparison.OrdinalIgnoreCase))
+            {
+                var geocoded = await _geoService.GeocodeAsync(request.City);
+                if (geocoded != null)
+                {
+                    tournament.Lat = geocoded.Lat;
+                    tournament.Lng = geocoded.Lng;
+                }
+            }
+            else
+            {
+                // Explicitly Online or no city
+                tournament.City = "Online";
+                tournament.Lat = null;
+                tournament.Lng = null;
+            }
+
 
             
             // Organizer must exist? We assume yes from request info or auth.
@@ -127,6 +147,11 @@ namespace GFlow.Application.Services
             if (request.PlayerLimit.HasValue && request.PlayerLimit.Value > 0) 
             {
                  tournament.PlayerLimit = request.PlayerLimit.Value;
+            }
+
+            if (!string.IsNullOrEmpty(request.Emblem))
+            {
+                tournament.Emblem = request.Emblem;
             }
 
             return await _tournamentRepo.Update(tournament);

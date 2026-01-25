@@ -9,6 +9,7 @@ import chessBg from '../assets/backgrounds/chess-bg.jpg';
 import lolBg from '../assets/backgrounds/lol-bg.jpg';
 import homm3Bg from '../assets/backgrounds/homm3-bg.jpg';
 import wotBg from '../assets/backgrounds/wot-bg.jpg';
+import defaultBg from '../assets/backgrounds/default-bg.jpg';
 
 const GAME_BACKGROUNDS: Record<string, string> = {
   cs2: cs2Bg,
@@ -16,7 +17,7 @@ const GAME_BACKGROUNDS: Record<string, string> = {
   lol: lolBg,
   homm3: homm3Bg,
   wot: wotBg,
-  default: '/path/to/default.jpg',
+  default: defaultBg,
 };
 
 function Home() {
@@ -170,7 +171,7 @@ function Home() {
               <Emblem
                 {...item}
                 title={item.title}
-                game={t(`games.${item.game.code}`)}
+                game={item.game.name}
                 location={item.location}
                 active={i === activeIndex}
                 callBack={() => handleClick(i)}

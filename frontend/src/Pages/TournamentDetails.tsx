@@ -20,6 +20,7 @@ function TournamentDetails() {
       trackTournamentActivity(id, 'view');
 
       const data = await getTournamentById(id);
+      console.log('Tournament Details received:', data);
       setTournament(data);
       setLoading(false);
     };
@@ -63,8 +64,16 @@ function TournamentDetails() {
                 <div className="detail-item">
                     <strong>{t('location')}:</strong> {tournament.location}
                 </div>
-                 <div className="detail-item">
-                    <strong>{t('organizer') || 'Organizer'}:</strong> {tournament.details}
+                <div className="detail-item">
+                    <strong>{t('systemType') || 'System'}:</strong> {tournament.systemType}
+                </div>
+                {tournament.numberOfRounds && (
+                    <div className="detail-item">
+                        <strong>{t('rounds') || 'Rounds'}:</strong> {tournament.numberOfRounds}
+                    </div>
+                )}
+                <div className="detail-item">
+                    <strong>{t('maxPlayers') || 'Max Players'}:</strong> {tournament.playerLimit}
                 </div>
             </div>
 

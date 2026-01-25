@@ -11,11 +11,13 @@ interface TournamentCardProps {
     code: string;
   };
   location: string;
-  details: string;
+  systemType?: string;
+  numberOfRounds?: number;
+  playerLimit?: number;
   status?: 'active' | 'upcoming' | 'completed';
 }
 
-function TournamentCard({ id, title, date, game, location, details, status = 'upcoming' }: TournamentCardProps) {
+function TournamentCard({ id, title, date, game, location, systemType, numberOfRounds, playerLimit, status = 'upcoming' }: TournamentCardProps) {
   const { t } = useTranslation('mainPage');
 
   return (
@@ -24,7 +26,7 @@ function TournamentCard({ id, title, date, game, location, details, status = 'up
         <div className="tournament-card-header">
           <div>
             <h3>{title}</h3>
-            <span className="tournament-game">{t(`games.${game.code}`)}</span>
+            <span className="tournament-game">{game.name}</span>
           </div>
           <span className={`tournament-status status-${status}`}>
             {status === 'active' && t('active')}
@@ -43,9 +45,19 @@ function TournamentCard({ id, title, date, game, location, details, status = 'up
             <span className="info-value">{location}</span>
           </div>
           <div className="info-row">
-            <span className="info-label">{t('details')}:</span>
-            <span className="info-value">{details}</span>
+             <span className="info-label">{t('systemType') || 'System'}:</span>
+             <span className="info-value">{systemType ? t(`systemTypes.${systemType}`) : ''}</span>
           </div>
+           {numberOfRounds && (
+             <div className="info-row">
+               <span className="info-label">{t('rounds') || 'Rounds'}:</span>
+               <span className="info-value">{numberOfRounds}</span>
+             </div>
+           )}
+           <div className="info-row">
+             <span className="info-label">{t('maxPlayers') || 'Max'}:</span>
+             <span className="info-value">{playerLimit}</span>
+           </div>
         </div>
       </div>
     </Link>

@@ -24,7 +24,7 @@ namespace GFlow.Api.Controllers
 
 
         [HttpPost]
-        [Authorize]
+        // [Authorize]
         public async Task<ActionResult<TournamentResponse>> Create([FromBody] CreateTournamentRequest request)
         {
             var tournament = await _tournamentService.CreateTournamentAsync(request);
@@ -194,7 +194,8 @@ namespace GFlow.Api.Controllers
                 Lng = t.Lng,
                 ViewCount = t.ViewCount,
                 ParticipantCount = t.Participants?.Count ?? 0,
-                Emblem = t.Emblem
+                Emblem = t.Emblem,
+                SystemType = t.SystemType.ToString()
             };
         }
 

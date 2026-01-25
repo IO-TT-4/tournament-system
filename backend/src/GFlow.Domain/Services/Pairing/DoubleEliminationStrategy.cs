@@ -3,7 +3,7 @@ using GFlow.Domain.ValueObjects;
 
 namespace GFlow.Domain.Services.Pairings
 {
-    public class DoubleEleminationStrategy : IPairingStrategy
+    public class DoubleEliminationStrategy : IPairingStrategy
     {
         private const int LOSERS_BRACKET_OFFSET = 1000;
 

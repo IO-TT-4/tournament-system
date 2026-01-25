@@ -60,6 +60,10 @@ export interface Tournament {
   lat: number | null;
 
   lng: number | null;
+  organizer: string;
+  systemType: string;
+  numberOfRounds?: number;
+  playerLimit: number;
 }
 
 
@@ -100,7 +104,11 @@ export async function getTournaments(params: TournamentParams = {}) {
       code: t.gameCode || 'all',
     },
     location: t.city || 'Online',
-    details: `Organizer: ${t.organizerName}`,
+    details: '',
+    organizer: t.organizerName,
+    systemType: t.systemType,
+    numberOfRounds: t.numberOfRounds,
+    playerLimit: t.playerLimit,
     status: t.status === 'ONGOING' ? 'active' : t.status === 'FINISHED' ? 'completed' : 'upcoming',
     lat: t.lat,
     lng: t.lng,
@@ -117,6 +125,7 @@ export async function getTournaments(params: TournamentParams = {}) {
 export async function getTournamentById(id: string): Promise<Tournament | null> {
   try {
     const response = await api.get(`/tournament/${id}`);
+    console.log('API Raw Response (ById):', response.data);
     const t = response.data;
     return {
       id: t.id,
@@ -128,7 +137,11 @@ export async function getTournamentById(id: string): Promise<Tournament | null> 
         code: t.gameCode || 'all',
       },
       location: t.city || 'Online',
-      details: `Organizer: ${t.organizerName}`,
+      details: '',
+      organizer: t.organizerName || t.OrganizerName,
+      systemType: t.systemType || t.SystemType,
+      numberOfRounds: t.numberOfRounds || t.NumberOfRounds,
+      playerLimit: t.playerLimit || t.PlayerLimit,
       status: t.status === 'ONGOING' ? 'active' : t.status === 'FINISHED' ? 'completed' : 'upcoming',
       lat: t.lat,
       lng: t.lng,
@@ -147,3 +160,39 @@ export async function trackTournamentActivity(id: string, type: 'view' | 'click'
   }
 }
 
+// Create Tournament
+export interface CreateTournamentRequest {
+  name: string;
+  organizerId: string;
+  systemType: string;
+  maxParticipants: number;
+  startDate: Date;
+  endDate: Date;
+  countryCode?: string;
+  city?: string;
+  address?: string;
+  // lat/lng removed
+  gameCode?: string;
+  gameName?: string;
+  emblem?: string;
+  description?: string;
+  numberOfRounds?: number;
+}
+
+export async function createTournament(data: CreateTournamentRequest) {
+  try {
+    const response = await api.post('/tournament', data);
+    return response;
+  } catch (error) {
+    handleError(error);
+  }
+}
+
+export async function addModerator(tournamentId: string, userId: string) {
+  try {
+    const response = await api.post(`/tournament/${tournamentId}/moderator/${userId}`);
+    return response;
+  } catch (error) {
+    handleError(error);
+  }
+}

@@ -1,4 +1,5 @@
 import type { MouseEventHandler } from 'react';
+import { useTranslation } from 'react-i18next';
 import '../assets/styles/emblem.css';
 
 const supportedEmblems = ['chess-pawn', 'diamond', 'shield', 'default'];
@@ -9,7 +10,9 @@ function Emblem({
   emblem,
   game,
   location,
-  details,
+  systemType,
+  numberOfRounds,
+  playerLimit,
   active,
   callBack,
 }: {
@@ -18,10 +21,14 @@ function Emblem({
   emblem: string;
   game: string;
   location: string;
-  details?: string;
+  systemType?: string;
+  numberOfRounds?: number;
+  playerLimit?: number;
   active?: boolean;
   callBack?: MouseEventHandler;
 }) {  
+  const { t } = useTranslation('mainPage');
+
   if (!supportedEmblems.includes(emblem)) {
     console.warn(`Unsupported emblem: ${emblem}. Using 'default' instead.`);
     emblem = 'default';
@@ -37,7 +44,14 @@ function Emblem({
         <div className="location-name">{location}</div>
         <div className="title">{title}</div>
         <div className="date">{date}</div>
-        <div className="info">{details}</div>
+        <div className="info">
+           <div className="info-main">{systemType ? t(`systemTypes.${systemType}`) : ''}</div>
+           <div className="info-sub">
+             {numberOfRounds && <span>{numberOfRounds} {t('rnds') || 'Rnds'}</span>}
+             {numberOfRounds && playerLimit && <span className="separator">•</span>}
+             {playerLimit && <span>{t('max') || 'Max'}: {playerLimit}</span>}
+           </div>
+        </div>
       </div>
     </div>
   );

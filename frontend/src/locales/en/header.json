@@ -10,6 +10,7 @@
       "logout": "Logout"
     },
     "tournaments": "Tournaments",
+    "createTournament": "Create",
     "logoAlt": "G-Flow Logo"
   }
 }

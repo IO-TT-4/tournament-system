@@ -10,11 +10,11 @@ namespace GFlow.Domain.Tests
 {
     public class SingleEliminationStrategyTests
     {
-        private readonly SingleEleminationStrategy _strategy;
+        private readonly SingleEliminationStrategy _strategy;
 
         public SingleEliminationStrategyTests()
         {
-            _strategy = new SingleEleminationStrategy();
+            _strategy = new SingleEliminationStrategy();
         }
 
         [Fact]

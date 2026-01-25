@@ -22,6 +22,7 @@ namespace GFlow.Application.DTOs
     public int ParticipantCount { get; set; }
     public double RelevanceScore { get; set; }
     public string? Emblem { get; set; }
+    public required string SystemType { get; set; }
 }
 
 

@@ -98,8 +98,8 @@ namespace GFlow.Domain.Tests
         public void Elimination_WithdrawnPlayer_ShouldNotBeSeededInFirstRound()
         {
             // Arrange
-            var strategy = new SingleEleminationStrategy();
-            var tournament = new Tournament { Id = "t1", Name = "Test", SystemType = TournamentSystemType.SINGLE_ELEMINATION };
+            var strategy = new SingleEliminationStrategy();
+            var tournament = new Tournament { Id = "t1", Name = "Test", SystemType = TournamentSystemType.SINGLE_ELIMINATION };
             var participants = new List<TournamentParticipant>
             {
                 new TournamentParticipant("u1", 1000),

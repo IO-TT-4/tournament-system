@@ -5,7 +5,9 @@ import Login from './Pages/Login';
 import Register from './Pages/Register';
 import Tournaments from './Pages/Tournaments';
 import TournamentDetails from './Pages/TournamentDetails';
+import CreateTournament from './Pages/CreateTournament';
 import NotFound from './Pages/NotFound';
+import ProtectedRoute from './Components/ProtectedRoute';
 
 export const router = createBrowserRouter([
   {
@@ -15,6 +17,7 @@ export const router = createBrowserRouter([
       { path: '/login', element: <Login /> },
       { path: '/register', element: <Register /> },
       { path: '/tournaments', element: <Tournaments /> },
+      { path: '/create-tournament', element: <ProtectedRoute><CreateTournament /></ProtectedRoute> },
       { path: '/tournament/:id', element: <TournamentDetails /> },
       { path: '*', element: <NotFound /> },
     ],
