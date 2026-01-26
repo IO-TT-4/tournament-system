@@ -102,6 +102,12 @@ namespace GFlow.Infrastructure.Persistance.Repositories
             return true;
         }
 
+        public async Task AddParticipant(TournamentParticipant participant)
+        {
+            await _context.TournamentParticipants.AddAsync(participant);
+            await _context.SaveChangesAsync();
+        }
+
         public async Task<TournamentParticipant?> GetParticipant(string tournamentId, string userId)
         {
             return await _context.TournamentParticipants.FindAsync(tournamentId, userId);

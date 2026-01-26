@@ -11,5 +11,7 @@ namespace GFlow.Application.DTOs
         public int Draws { get; set; }
         public int Losses { get; set; }
         public bool IsWithdrawn { get; set; }
+        public double Buchholz { get; set; }
+        public Dictionary<string, double> TieBreakerValues { get; set; } = new();
     }
 }

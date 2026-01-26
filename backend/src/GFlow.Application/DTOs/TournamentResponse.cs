@@ -9,6 +9,7 @@ namespace GFlow.Application.DTOs
     public DateTime StartDate { get; set; }
     public DateTime EndDate { get; set; }
     public int? NumberOfRounds { get; set; }
+    public List<string> TieBreakers { get; set; } = new();
     
     // New fields
     public string? Status { get; set; }
@@ -23,6 +24,16 @@ namespace GFlow.Application.DTOs
     public double RelevanceScore { get; set; }
     public string? Emblem { get; set; }
     public required string SystemType { get; set; }
+    public string? Description { get; set; }
+    public required string OrganizerId { get; set; }
+    public List<string> ModeratorIds { get; set; } = new();
+    public List<ParticipantDto> Participants { get; set; } = new();
+}
+
+public class ParticipantDto
+{
+    public required string Id { get; set; }
+    public required string Username { get; set; }
 }
 
 

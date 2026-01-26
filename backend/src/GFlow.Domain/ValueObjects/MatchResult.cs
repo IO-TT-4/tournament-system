@@ -2,19 +2,21 @@ namespace GFlow.Domain.ValueObjects
 {
     public class MatchResult
     {
-        public double ScoreA { get; init; }
-        public double ScoreB { get; init; }
-        public MatchFinishType FinishType { get; init; }
+        public double ScoreA { get; set; }
+        public double ScoreB { get; set; }
+        public MatchFinishType FinishType { get; set; }
+
+        public MatchResult() { }
 
         public MatchResult(double scoreA, double scoreB, MatchFinishType finishType = MatchFinishType.Normal)
-    {
-        if (scoreA < 0 || scoreB < 0)
-            throw new ArgumentException("Scores cannot be negative.");
+        {
+            if (scoreA < 0 || scoreB < 0)
+                throw new ArgumentException("Scores cannot be negative.");
 
-        ScoreA = scoreA;
-        ScoreB = scoreB;
-        FinishType = finishType;
-    }
+            ScoreA = scoreA;
+            ScoreB = scoreB;
+            FinishType = finishType;
+        }
 
         public bool IsRatedGame => FinishType == MatchFinishType.Normal;
 

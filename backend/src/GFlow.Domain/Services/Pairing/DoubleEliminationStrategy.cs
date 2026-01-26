@@ -112,7 +112,7 @@ namespace GFlow.Domain.Services.Pairings
 
                 if (finalWBWinners.Count == 1 && finalLBWinners.Count == 1 && !pendingWBLosers.Any())
                 {
-                    var match = new Match(tournamentId, finalWBWinners[0], finalLBWinners[0], nextRoundNumber, tournamentId);
+                    var match = new Match(Guid.NewGuid().ToString(), finalWBWinners[0], finalLBWinners[0], nextRoundNumber, tournamentId);
                     match.PositionInRound = 1;
                     nextMatches.Add(match);
                     generatedAnything = true;
@@ -135,7 +135,7 @@ namespace GFlow.Domain.Services.Pairings
             var matches = new List<Match>();
             for (int i = 0; i < matchesInFirstRound; i++)
             {
-                var match = new Match(tournamentId, Guid.Empty.ToString(), Guid.Empty.ToString(), 1, tournamentId);
+                var match = new Match(Guid.NewGuid().ToString(), Guid.Empty.ToString(), null, 1, tournamentId);
                 match.PositionInRound = i + 1; // WB position
                 
                 // Standard Seeding 1 vs N, 2 vs N-1
@@ -144,7 +144,7 @@ namespace GFlow.Domain.Services.Pairings
                     match.PlayerAwayId = players[bracketSize - 1 - i].UserId;
                 else
                 {
-                    match.PlayerAwayId = Guid.Empty.ToString();
+                    match.PlayerAwayId = null;
                     match.SetResult(MatchResult.CreateBye());
                 }
 
@@ -158,7 +158,7 @@ namespace GFlow.Domain.Services.Pairings
             var matches = new List<Match>();
             for (int i = 0; i < winners.Count; i += 2)
             {
-                var match = new Match(tournamentId, winners[i], winners[i + 1], roundNumber, tournamentId);
+                var match = new Match(Guid.NewGuid().ToString(), winners[i], winners[i + 1], roundNumber, tournamentId);
                 match.PositionInRound = (i / 2) + 1;
                 matches.Add(match);
             }
@@ -170,7 +170,7 @@ namespace GFlow.Domain.Services.Pairings
             var matches = new List<Match>();
             for (int i = 0; i < wbLosers.Count; i += 2)
             {
-                var match = new Match(tournamentId, wbLosers[i], wbLosers[i + 1], roundNumber, tournamentId);
+                var match = new Match(Guid.NewGuid().ToString(), wbLosers[i], wbLosers[i + 1], roundNumber, tournamentId);
                 match.PositionInRound = LOSERS_BRACKET_OFFSET + (i / 2) + 1;
                 matches.Add(match);
             }
@@ -184,7 +184,7 @@ namespace GFlow.Domain.Services.Pairings
             // Usually we need to be careful with seeding here, but for now simple positional match.
             for (int i = 0; i < Math.Min(lbWinners.Count, wbLosers.Count); i++)
             {
-                var match = new Match(tournamentId, lbWinners[i], wbLosers[i], roundNumber, tournamentId);
+                var match = new Match(Guid.NewGuid().ToString(), lbWinners[i], wbLosers[i], roundNumber, tournamentId);
                 match.PositionInRound = LOSERS_BRACKET_OFFSET + i + 1;
                 matches.Add(match);
             }
@@ -196,7 +196,7 @@ namespace GFlow.Domain.Services.Pairings
             var matches = new List<Match>();
             for (int i = 0; i < lbWinners.Count; i += 2)
             {
-                var match = new Match(tournamentId, lbWinners[i], lbWinners[i + 1], roundNumber, tournamentId);
+                var match = new Match(Guid.NewGuid().ToString(), lbWinners[i], lbWinners[i + 1], roundNumber, tournamentId);
                 match.PositionInRound = LOSERS_BRACKET_OFFSET + (i / 2) + 1;
                 matches.Add(match);
             }
@@ -231,9 +231,9 @@ namespace GFlow.Domain.Services.Pairings
         private List<string> GetLosersFromMatches(List<Match> matches)
         {
             return matches
-                .Where(m => m.PlayerAwayId != Guid.Empty.ToString())
+                .Where(m => m.PlayerAwayId != null)
                 .OrderBy(m => m.PositionInRound)
-                .Select(m => m.Result!.ScoreA > m.Result.ScoreB ? m.PlayerAwayId : m.PlayerHomeId)
+                .Select(m => m.Result!.ScoreA > m.Result.ScoreB ? m.PlayerAwayId! : m.PlayerHomeId)
                 .ToList();
         }
     }

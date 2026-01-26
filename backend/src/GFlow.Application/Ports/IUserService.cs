@@ -7,5 +7,6 @@ namespace GFlow.Application.Ports
     {
         public Task<User?> GetUser(string id);
         public Task<IEnumerable<User>> GetAllUsers();
+        public Task<IEnumerable<User>> SearchUsers(string term);
     }
 }

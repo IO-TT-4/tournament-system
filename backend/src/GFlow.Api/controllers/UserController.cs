@@ -44,6 +44,13 @@ namespace GFlow.Api.Controllers
         {
             var users = await _userService.GetAllUsers();
             return Ok(users);
+        }
+
+        [HttpGet("search")]
+        public async Task<IActionResult> Search([FromQuery] string query)
+        {
+            var users = await _userService.SearchUsers(query);
+            return Ok(users.Select(u => new { u.Id, u.Username, u.Email }));
         }   
 
     }

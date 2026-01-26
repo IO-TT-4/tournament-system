@@ -47,5 +47,16 @@ namespace GFlow.Infrastructure.Persistance.Repositories
         {
             return await _context.Users.ToListAsync();
         }
+
+        public async Task<IEnumerable<User>> Search(string term)
+        {
+            if (string.IsNullOrWhiteSpace(term)) return new List<User>();
+            
+            // Case-insensitive search on Username or Email
+            return await _context.Users
+                .Where(u => EF.Functions.Like(u.Username, $"%{term}%") || EF.Functions.Like(u.Email, $"%{term}%"))
+                .Take(10) // Limit results
+                .ToListAsync();
+        }
     }
 }

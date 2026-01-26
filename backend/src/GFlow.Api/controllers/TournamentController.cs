@@ -24,15 +24,25 @@ namespace GFlow.Api.Controllers
 
 
         [HttpPost]
-        // [Authorize]
+        [Authorize]
         public async Task<ActionResult<TournamentResponse>> Create([FromBody] CreateTournamentRequest request)
         {
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Unauthorized();
+            }
+
+            // Force the OrganizerId to be the authenticated user
+            request.OrganizerId = userId;
+
             var tournament = await _tournamentService.CreateTournamentAsync(request);
 
             if (tournament is null)
             {
                 // If the service did not create the tournament (e.g. internal validation error)
-                return BadRequest("Could not create tournament.");
+                // It could also be that the user doesn't exist in the DB even if they have a token (rare but possible)
+                return BadRequest("Could not create tournament. Ensure valid data.");
             }
 
             var response = MapToResponse(tournament);
@@ -174,6 +184,90 @@ namespace GFlow.Api.Controllers
             return NoContent();
         }
 
+        [HttpPost("{id}/rounds/start")]
+        [Authorize]
+        public async Task<ActionResult> StartNextRound(string id)
+        {
+            // Check permissions: Organizer or Moderator
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            if (userId == null) return Unauthorized();
+
+            var tournament = await _tournamentService.GetTournament(id);
+            if (tournament == null) return NotFound("Tournament not found.");
+
+            bool isOrganizer = tournament.OrganizerId == userId;
+            bool isModerator = tournament.Moderators?.Any(u => u.Id == userId) ?? false;
+
+            if (!isOrganizer && !isModerator)
+            {
+                return Forbid();
+            }
+
+            var success = await _tournamentService.StartNextRoundAsync(id);
+            if (!success)
+            {
+                return BadRequest("Could not start next round. Ensure previous round is finished.");
+            }
+            return Ok();
+        }
+
+        [HttpGet("{id}/matches")]
+        public async Task<ActionResult<List<MatchDto>>> GetMatches(string id)
+        {
+            var matches = await _tournamentService.GetMatchesAsync(id);
+            return Ok(matches);
+        }
+
+        [HttpPost("{id}/participants")]
+        [Authorize]
+        public async Task<ActionResult> AddParticipant(string id, [FromBody] AddParticipantDto request)
+        {
+             // Permission check: Organizer only (or Moderator?)
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            if (userId == null) return Unauthorized();
+
+            var tournament = await _tournamentService.GetTournament(id);
+            if (tournament == null) return NotFound("Tournament not found.");
+            
+            if (tournament.OrganizerId != userId) // Strict: Only Organizer can manually add?
+            {
+                // return Forbid(); // Let's allow simple auth for now or keep strict
+                // User requirement: "organizer mogl dopisac"
+                if (tournament.OrganizerId != userId) return Forbid();
+            }
+
+            var success = await _tournamentService.AddParticipantAsync(id, request.Username);
+            if (!success) return BadRequest("Could not add participant. User might not exist or tournament is full.");
+
+            return Ok();
+        }
+
+        [HttpPost("matches/{matchId}/result")]
+        [Authorize]
+        public async Task<ActionResult> SubmitMatchResult(string matchId, [FromBody] MatchResultDto result)
+        {
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            if (userId == null) return Unauthorized();
+
+            // We do not pass TournamentId here because MatchId is unique globaly (in theory) or service handles it.
+            // Service `SubmitMatchResultAsync` takes matchId.
+            // Wait, route is `api/Tournament/matches/...` or `api/Tournament/{id}/matches/...`?
+            // The method in service signatures: `SubmitMatchResultAsync(string matchId, ...)`
+            // I'll put it at `[HttpPost("matches/{matchId}/result")]` under `api/Tournament` controller.
+            // It acts as a global match update or we could nest it if we want to enforce tournament boundaries in URL. 
+            // Stick to simple Global Match ID approach as Service handles validation.
+
+            var success = await _tournamentService.SubmitMatchResultAsync(matchId, result.ScoreA, result.ScoreB, userId, result.FinishType);
+            
+            if (!success)
+            {
+                // Could be auth error or match not found or permissions
+                return BadRequest("Could not submit result. Check permissions or match status.");
+            }
+
+            return Ok();
+        }
+
         // Helper mapping method to avoid code repetition (DRY)
         private static TournamentResponse MapToResponse(Tournament t)
         {
@@ -186,6 +280,8 @@ namespace GFlow.Api.Controllers
                 StartDate = t.StartDate,
                 EndDate = t.EndDate,
                 Status = t.Status.ToString(),
+                NumberOfRounds = t.NumberOfRounds,
+                TieBreakers = t.TieBreakers,
                 GameCode = t.GameCode,
                 GameName = t.GameName,
                 City = t.City,
@@ -195,7 +291,15 @@ namespace GFlow.Api.Controllers
                 ViewCount = t.ViewCount,
                 ParticipantCount = t.Participants?.Count ?? 0,
                 Emblem = t.Emblem,
-                SystemType = t.SystemType.ToString()
+                SystemType = t.SystemType.ToString(),
+                Description = t.Description,
+                OrganizerId = t.OrganizerId, // Assuming OrganizerId is on Tournament entity
+                ModeratorIds = t.Moderators?.Select(m => m.Id).ToList() ?? new List<string>(),
+                Participants = t.Participants?.Select(p => new ParticipantDto 
+                { 
+                    Id = p.Id, 
+                    Username = p.Username 
+                }).ToList() ?? new List<ParticipantDto>()
             };
         }
 

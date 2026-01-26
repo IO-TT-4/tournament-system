@@ -7,7 +7,7 @@ namespace GFlow.Domain.Entities
     {
         public string Id { get; set; } = Guid.NewGuid().ToString();
         public required string PlayerHomeId { get; set; }
-        public required string PlayerAwayId { get; set; }
+        public string? PlayerAwayId { get; set; }
 
         public int RoundNumber { get; set; }
 
@@ -15,14 +15,44 @@ namespace GFlow.Domain.Entities
 
         public int? PositionInRound { get; set; }
 
-        public MatchResult? Result { get; private set; }
+        public double? ScoreA { get; set; }
+        public double? ScoreB { get; set; }
+        public MatchFinishType? FinishType { get; set; }
+
+        // Wrapper property to maintain backward compatibility with code using Result object
+        public MatchResult? Result
+        {
+            get
+            {
+                if (ScoreA.HasValue && ScoreB.HasValue && FinishType.HasValue)
+                {
+                    return new MatchResult(ScoreA.Value, ScoreB.Value, FinishType.Value);
+                }
+                return null;
+            }
+            set
+            {
+                if (value == null)
+                {
+                    ScoreA = null;
+                    ScoreB = null;
+                    FinishType = null;
+                }
+                else
+                {
+                    ScoreA = value.ScoreA;
+                    ScoreB = value.ScoreB;
+                    FinishType = value.FinishType;
+                }
+            }
+        }
         
         public List<MatchEvent> Events { get; set; } = new();
 
         private Match() { }
 
         [SetsRequiredMembers]
-        public Match(string id, string playerAId, string playerBId, int roundNumber, string tournamentId)
+        public Match(string id, string playerAId, string? playerBId, int roundNumber, string tournamentId)
         {
             Id = id;
             PlayerHomeId = playerAId;

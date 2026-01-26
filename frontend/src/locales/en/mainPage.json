@@ -75,8 +75,18 @@
   "notFound": {
     "title": "Page not found",
     "message": "Sorry, the page you are looking for does not exist or has been moved. Please check the URL or return to the home page.",
-    "backHome": "Back to home page"
+    "backHome": "Back to home page",
+    "backToTournaments": "Back to Tournaments"
   },
+  "joinTournament": "Join Tournament",
+  "edit": "Edit",
+  "withdraw": "Withdraw",
+  "participants": "Participants",
+  "noDescription": "No description provided.",
+  "noParticipants": "No participants yet.",
+  "organizer": "Organizer",
+  "startNextRound": "Start Next Round",
+  "confirmStartRound": "Are you sure you want to start the next round?",
   "tournamentsData": {
     "warsaw-chess": "Grandmaster Chess Warsaw",
     "berlin-cs2": "Berlin Master League",

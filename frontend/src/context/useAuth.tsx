@@ -53,14 +53,17 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
     await registerApi(email, username, password)
       .then((res) => {
         if (res) {
-          localStorage.setItem('accessToken', res?.data.accessToken);
+          localStorage.setItem('accessToken', res?.data.token);
+          if (res?.data.refreshToken) {
+            localStorage.setItem('refreshToken', res?.data.refreshToken);
+          }
           const userObj = {
             username: res?.data.username,
             email: res?.data.email,
             id: res?.data.id,
           };
           localStorage.setItem('user', JSON.stringify(userObj));
-          setToken(res?.data.accessToken);
+          setToken(res?.data.token);
           setUser(userObj);
           toast.success(`${t('registerSuccess')}!`);
           navigate('/');
@@ -75,14 +78,17 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
     await loginAPI(username, password)
       .then((res) => {
         if (res) {
-          localStorage.setItem('accessToken', res?.data.accessToken);
+          localStorage.setItem('accessToken', res?.data.token);
+          if (res?.data.refreshToken) {
+              localStorage.setItem('refreshToken', res?.data.refreshToken);
+          }
           const userObj = {
             username: res?.data.username,
             email: res?.data.email,
             id: res?.data.id,
           };
           localStorage.setItem('user', JSON.stringify(userObj));
-          setToken(res?.data.accessToken);
+          setToken(res?.data.token);
           setUser(userObj);
           toast.success(`${t('loginSuccess')}!`);
           navigate('/');
@@ -99,6 +105,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
 
   function logout() {
     localStorage.removeItem('accessToken');
+    localStorage.removeItem('refreshToken');
     localStorage.removeItem('user');
     setUser(null);
     setToken(null);

@@ -1,0 +1,8 @@
+
+> tournament-system-frontend@0.0.0 build
+> tsc -b && vite build
+
+src/Pages/TournamentDetails.tsx(2,33): error TS2307: Cannot find module 'react-router-dom' or its corresponding type declarations.
+src/Pages/TournamentDetails.tsx(4,54): error TS2305: Module '"../services/AuthService"' has no exported member 'startNextRound'.
+src/Pages/TournamentDetails.tsx(71,62): error TS2367: This comparison appears to be unintentional because the types '"active" | "upcoming" | "completed"' and '"ONGOING"' have no overlap.
+src/Pages/TournamentDetails.tsx(71,97): error TS2367: This comparison appears to be unintentional because the types '"active" | "upcoming" | "completed"' and '"CREATED"' have no overlap.

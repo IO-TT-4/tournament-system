@@ -29,14 +29,26 @@ function Emblem({
 }) {  
   const { t } = useTranslation('mainPage');
 
-  if (!supportedEmblems.includes(emblem)) {
-    console.warn(`Unsupported emblem: ${emblem}. Using 'default' instead.`);
+  // Check if emblem is a URL or custom path
+  const isUrl = emblem.startsWith('http') || emblem.startsWith('/') || emblem.startsWith('data:');
+
+  if (!isUrl && !supportedEmblems.includes(emblem)) {
+    console.warn(`Unsupported emblem key: ${emblem}. Using 'default' instead.`);
     emblem = 'default';
   }
 
+  // If it's a URL, use background-image style. Otherwise use default CSS classes.
+  const style = isUrl ? { 
+      backgroundImage: `url(${emblem})`, 
+      backgroundSize: 'cover', 
+      backgroundPosition: 'center',
+      filter: 'none' // Remove grayscale/blur for actual photos
+  } : {};
+
   return (
     <div
-      className={`emblem ${emblem} ${active ? 'active' : 'inactive'}`}
+      className={`emblem ${!isUrl ? emblem : ''} ${active ? 'active' : 'inactive'}`}
+      style={style}
       onClick={callBack}>
       <div className="mask-layer"></div>
       <div className="text-container">

@@ -1,11 +1,12 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router';
-import { createTournament, addModerator } from '../services/AuthService';
+import { createTournament, addModerator, searchUsers } from '../services/AuthService';
 import '../assets/styles/createTournament.css';
 import { toast } from 'react-toastify';
 import Emblem from '../Components/Emblem'; // Import Emblem for preview
 import HtmlEditor from '../Components/HtmlEditor'; // Import HtmlEditor
+import TieBreakerSelector from '../Components/TieBreakerSelector';
 
 function CreateTournament() {
   const { t } = useTranslation('mainPage');
@@ -24,11 +25,13 @@ function CreateTournament() {
     address: '',
     emblem: 'default',
     description: '',
-    numberOfRounds: 5
+    numberOfRounds: 5,
+    tieBreakers: [] as string[]
   });
 
-  const [moderators, setModerators] = useState<string[]>([]);
-  const [currentMod, setCurrentMod] = useState('');
+  const [moderators, setModerators] = useState<{ id: string, username: string }[]>([]);
+  const [currentModQuery, setCurrentModQuery] = useState('');
+  const [searchResults, setSearchResults] = useState<{ id: string, username: string }[]>([]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -54,16 +57,38 @@ function CreateTournament() {
     setFormData(prev => ({ ...prev, isOnline: e.target.checked }));
   };
 
-  const addMod = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (currentMod && !moderators.includes(currentMod)) {
-      setModerators([...moderators, currentMod]);
-      setCurrentMod('');
+  const handleSearch = async (val: string) => {
+    setCurrentModQuery(val);
+    if (val.length > 2) {
+       const results = await searchUsers(val);
+       setSearchResults(results);
+    } else {
+       setSearchResults([]);
     }
   };
 
-  const removeMod = (mod: string) => {
-    setModerators(moderators.filter(m => m !== mod));
+  const handleAddClick = () => {
+      // Find user in search results that matches current input
+      const user = searchResults.find(u => u.username === currentModQuery);
+      if (user) {
+          addMod(user);
+      } else {
+          // Optional: Allow non-search match if backend supports resolving by exact username later?
+          // For now, let's enforce selection from search or exact match in results
+          toast.error(t('selectUserFromList') || 'Please select a valid user from the search');
+      }
+  };
+
+  const addMod = (user: { id: string, username: string }) => {
+    if (!moderators.some(m => m.id === user.id)) {
+      setModerators([...moderators, user]);
+    }
+    setCurrentModQuery('');
+    setSearchResults([]);
+  };
+
+  const removeMod = (id: string) => {
+    setModerators(moderators.filter(m => m.id !== id));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -83,7 +108,8 @@ function CreateTournament() {
       emblem: formData.emblem,
       organizerId: 'UNKNOWN',
       description: formData.description,
-      numberOfRounds: formData.systemType === 'SWISS' ? Number(formData.numberOfRounds) : undefined
+      numberOfRounds: formData.systemType === 'SWISS' ? Number(formData.numberOfRounds) : undefined,
+      tieBreakers: formData.systemType === 'SWISS' ? formData.tieBreakers : []
     };
 
     try {
@@ -93,7 +119,7 @@ function CreateTournament() {
         
         if (moderators.length > 0) {
            for (const mod of moderators) {
-             await addModerator(tournamentId, mod);
+             await addModerator(tournamentId, mod.id);
            }
         }
 
@@ -190,6 +216,10 @@ function CreateTournament() {
             </div>
           </div>
 
+
+
+// ...
+
           <div className="form-row">
             <div className="form-group">
               <label>{t('maxPlayers') || 'Max Players'}</label>
@@ -203,6 +233,13 @@ function CreateTournament() {
               </div>
             )}
           </div>
+          
+           {/* Tie Breakers */}
+           <TieBreakerSelector 
+              systemType={formData.systemType} 
+              selected={formData.tieBreakers} 
+              onChange={(newVal) => setFormData(prev => ({ ...prev, tieBreakers: newVal }))} 
+           />
 
           <div className="form-group">
              <label>{t('emblem') || 'Emblem'}</label>
@@ -252,18 +289,24 @@ function CreateTournament() {
 
           <div className="form-group">
             <label>{t('moderators') || 'Moderators (User IDs)'}</label>
-            <div className="moderator-input-group">
+            <div className="moderator-input-group" style={{ position: 'relative' }}>
               <input 
-                value={currentMod} 
-                onChange={(e) => setCurrentMod(e.target.value)} 
-                placeholder="Enter User ID" 
+                list="moderator-datalist"
+                value={currentModQuery} 
+                onChange={(e) => handleSearch(e.target.value)} 
+                placeholder={t('searchUser') || "Search User..."} 
               />
-              <button onClick={addMod} type="button">Add</button>
+              <datalist id="moderator-datalist">
+                  {searchResults.map(user => (
+                      <option key={user.id} value={user.username} />
+                  ))}
+              </datalist>
+              <button onClick={handleAddClick} type="button">{t('add') || 'Add'}</button>
             </div>
             <div className="moderators-list">
               {moderators.map(mod => (
-                <span key={mod} className="moderator-tag">
-                  {mod} <button type="button" onClick={() => removeMod(mod)} className="remove-mod-btn">x</button>
+                <span key={mod.id} className="moderator-tag">
+                  {mod.username} <button type="button" onClick={() => removeMod(mod.id)} className="remove-mod-btn">x</button>
                 </span>
               ))}
             </div>

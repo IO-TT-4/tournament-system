@@ -21,6 +21,12 @@ namespace GFlow.Domain.Entities
     /// </summary>
     public SeedingType SeedingType { get; set; } = SeedingType.Random;
     
+    /// <summary>
+    /// List of Tie Breaker codes (e.g., "BUCHHOLZ", "SONNEBORN_BERGER", "DIRECT_MATCH").
+    /// Order matters: first item is the primary tie breaker.
+    /// </summary>
+    public List<string> TieBreakers { get; set; } = new();
+    
     // Location Details
     public string? CountryCode { get; set; }
     public string? City { get; set; }
@@ -32,6 +38,8 @@ namespace GFlow.Domain.Entities
     public string? GameCode { get; set; }
     public string? GameName { get; set; }
     public string? Emblem { get; set; }
+    public string? Description { get; set; }
+    public int? NumberOfRounds { get; set; }
 
     // Statistics
     public long ViewCount { get; set; }

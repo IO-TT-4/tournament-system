@@ -71,8 +71,18 @@
   "notFound": {
     "title": "Strona nie znaleziona",
     "message": "Przepraszamy, ale strona której szukasz nie istnieje lub została przeniesiona. Sprawdź adres URL lub wróć na stronę główną.",
-    "backHome": "Powrót do strony głównej"
+    "backHome": "Powrót do strony głównej",
+    "backToTournaments": "Powrót do Turniejów"
   },
+  "joinTournament": "Dołącz do Turnieju",
+  "edit": "Edytuj",
+  "withdraw": "Wycofaj się",
+  "participants": "Uczestnicy",
+  "noDescription": "Brak opisu.",
+  "noParticipants": "Brak uczestników.",
+  "organizer": "Organizator",
+  "startNextRound": "Rozpocznij kolejną rundę",
+  "confirmStartRound": "Czy na pewno chcesz rozpocząć kolejną rundę?",
   "tournamentsData": {
     "warsaw-chess": "Grandmaster Chess Warszawa",
     "berlin-cs2": "Berlin Master League",

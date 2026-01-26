@@ -54,6 +54,7 @@ namespace GFlow.Application.Services
             if (!activities.Any()) return new List<string>();
 
             return activities
+                .Where(a => a.Tournament != null)
                 .GroupBy(a => a.Tournament.GameCode)
                 .Where(g => g.Key != null)
                 .OrderByDescending(g => g.Count())

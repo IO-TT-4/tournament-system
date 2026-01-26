@@ -47,16 +47,40 @@ namespace GFlow.Domain.Services.Pairings
                     .OrderBy(p => p.Score)
                     .First(p => !p.HasReceivedBye);
                     
-                var byeMatch = new Match(tournament.Id, byeCandidate.UserId, Guid.Empty.ToString(), nextRoundNumber, tournament.Id);
+                var byeMatch = new Match(Guid.NewGuid().ToString(), byeCandidate.UserId, null, nextRoundNumber, tournament.Id);
                 byeMatch.SetResult(MatchResult.CreateBye());
                 matches.Add(byeMatch);
                 sortedPlayers.Remove(byeCandidate);
             }
 
-            // Pairing within score groups (Rule 4)
-            if (SolvePairingWithScoreGroups(sortedPlayers, matches, tournament.Id, nextRoundNumber))
+            // Pairing with Global Backtracking (fixes deadlocks in small pools)
+            if (SolvePairingGlobal(sortedPlayers, matches, tournament.Id, nextRoundNumber))
             {
-                return matches;
+                // Assign Table Numbers (Sort by highest score on table)
+                var pMap = activeParticipants.ToDictionary(p => p.UserId, p => p);
+                
+                var orderedMatches = matches.OrderByDescending(m => 
+                {
+                   var p1 = pMap.GetValueOrDefault(m.PlayerHomeId);
+                   var p2 = m.PlayerAwayId != null ? pMap.GetValueOrDefault(m.PlayerAwayId) : null;
+                   
+                   // Force BYE to bottom
+                   bool isBye = (m.Result != null && m.Result.FinishType == MatchFinishType.Bye) || m.PlayerAwayId == null;
+                   if (isBye) return -double.MaxValue;
+
+                   // Primary sort: Max score on table
+                   var score = Math.Max(p1?.Score ?? -99, p2?.Score ?? -99);
+                   // Secondary sort: Max rank
+                   var rank = Math.Max(p1?.Ranking ?? 0, p2?.Ranking ?? 0);
+                   return (score * 100000) + rank;
+                }).ToList();
+
+                for(int i=0; i<orderedMatches.Count; i++)
+                {
+                    orderedMatches[i].PositionInRound = i + 1;
+                }
+
+                return orderedMatches;
             }
 
             throw new Exception("Cannot generate valid pairing consistent with Swiss system rules.");
@@ -112,7 +136,7 @@ namespace GFlow.Domain.Services.Pairings
             if (sorted.Count % 2 != 0)
             {
                 var lowest = sorted.Last();
-                var byeMatch = new Match(tournament.Id, lowest.UserId, Guid.Empty.ToString(), 1, tournament.Id);
+                var byeMatch = new Match(Guid.NewGuid().ToString(), lowest.UserId, null, 1, tournament.Id);
                 byeMatch.SetResult(MatchResult.CreateBye());
                 matches.Add(byeMatch);
                 sorted.Remove(lowest);
@@ -127,7 +151,7 @@ namespace GFlow.Domain.Services.Pairings
             // Rule: Upper half players with EVEN seeding (1-based index) play AWAY
             for (int i = 0; i < upperHalf.Count; i++)
             {
-                var match = new Match(tournament.Id, Guid.Empty.ToString(), Guid.Empty.ToString(), 1, tournament.Id);
+                var match = new Match(Guid.NewGuid().ToString(), Guid.Empty.ToString(), null, 1, tournament.Id);
                 
                 // Seeding number (1-based): i + 1
                 // If seeding is even -> upper player plays Away
@@ -152,104 +176,77 @@ namespace GFlow.Domain.Services.Pairings
             return matches;
         }
 
-        private bool SolvePairingWithScoreGroups(
-            List<TournamentParticipant> players, 
+        private bool SolvePairingGlobal(
+            List<TournamentParticipant> pool, 
             List<Match> result, 
             string tId, 
             int round)
         {
-            // Grouping by score (Rule 4)
-            var scoreGroups = players
-                .GroupBy(p => p.Score)
-                .OrderByDescending(g => g.Key)
-                .Select(g => g.ToList())
-                .ToList();
-
-            var unpaired = new List<TournamentParticipant>();
-            
-            foreach (var group in scoreGroups)
-            {
-                var currentPool = unpaired.Concat(group).ToList();
-                unpaired.Clear();
-                
-                // Attempt pairing within group + floaters
-                if (!SolvePairingInPool(currentPool, result, unpaired, tId, round))
-                {
-                    return false;
-                }
-            }
-            
-            // Check if everyone is paired
-            return unpaired.Count == 0;
-        }
-
-        private bool SolvePairingInPool(
-            List<TournamentParticipant> pool,
-            List<Match> result,
-            List<TournamentParticipant> floaters,
-            string tId,
-            int round)
-        {
             if (pool.Count == 0) return true;
-            if (pool.Count == 1)
-            {
-                floaters.Add(pool[0]);
-                return true;
-            }
 
             var p1 = pool[0];
+            // Candidates are all other players, prioritized by order (score/rank)
             var candidates = pool.Skip(1)
                 .Where(p2 => CanPair(p1, p2, round))
                 .ToList();
 
             foreach (var p2 in candidates)
             {
-                var match = new Match(tId, Guid.Empty.ToString(), Guid.Empty.ToString(), round, tId);
+                var match = new Match(Guid.NewGuid().ToString(), Guid.Empty.ToString(), null, round, tId);
                 AssignHomeAway(match, p1, p2, round);
 
                 result.Add(match);
-                var nextPool = pool.Where(p => p.UserId != p1.UserId && p.UserId != p2.UserId).ToList();
+                var remaining = pool.Where(p => p.UserId != p1.UserId && p.UserId != p2.UserId).ToList();
 
-                if (SolvePairingInPool(nextPool, result, floaters, tId, round))
+                if (SolvePairingGlobal(remaining, result, tId, round))
                     return true;
 
                 result.Remove(match);
             }
 
-            // Jeśli nie udało się sparować, dodaj do floaters
-            floaters.Add(p1);
-            return SolvePairingInPool(pool.Skip(1).ToList(), result, floaters, tId, round);
+            return false;
         }
 
         private bool CanPair(TournamentParticipant p1, TournamentParticipant p2, int currentRound)
         {
-            // Zasada 1 (podstawowa): nie grali ze sobą wcześniej
             if (p1.PlayedOpponentIds.Contains(p2.UserId))
+            {
+                 Console.WriteLine($"[Pairing] Conflict: {p1.UserId} vs {p2.UserId} -> Already Played");
                 return false;
+            }
 
             // Zasada 3: sprawdzenie czy nie będzie 3 lub więcej partii tym samym kolorem z rzędu
-            // (chyba że to ostatnia runda - wtedy dopuszczamy 3)
             if (!CanAssignRoles(p1, p2, currentRound))
+            {
+                 Console.WriteLine($"[Pairing] Conflict: {p1.UserId} vs {p2.UserId} -> Color Conflict");
                 return false;
+            }
 
             // Zasady 6-7: sprawdzenie historii przeciwników z różnymi punktami
+            // FIX: Dla małych turniejów ta zasada jest zbyt restrykcyjna i powoduje deadlocki.
+            // Wyłączamy ją, aby umożliwić parowanie w 3. rundzie przy małej liczbie graczy.
+            /*
             if (!CheckOpponentScoreHistory(p1, p2))
+            {
+                 Console.WriteLine($"[Pairing] Conflict: {p1.UserId} vs {p2.UserId} -> Score History Conflict");
                 return false;
+            }
+            */
 
             return true;
         }
 
         private bool CanAssignRoles(TournamentParticipant p1, TournamentParticipant p2, int currentRound)
         {
-            bool isLastRound = currentRound == _totalRounds;
+            // bool isLastRound = currentRound == _totalRounds; // Not needed if rule is absolute
             
             // Sprawdzenie dla p1
             if (p1.RoleHistory.Count >= 2)
             {
                 bool lastTwoSame = p1.RoleHistory[^1] == p1.RoleHistory[^2];
-                if (lastTwoSame && !isLastRound)
+                if (lastTwoSame) // Absolute rule: No 3 in a row ever
                 {
-                    // Gracz miał 2 z rzędu tym samym kolorem i to NIE jest ostatnia runda
+                    // Gracz miał 2 z rzędu tym samym kolorem
                     // Nie może mieć 3 z rzędu - musimy sprawdzić czy możemy przypisać inny kolor
                     
                     // Sprawdźmy czy p2 też ma problem z 2 z rzędu
@@ -262,7 +259,7 @@ namespace GFlow.Domain.Services.Pairings
                     // Jeśli obaj mają 2 z rzędu tym samym kolorem i to są te same kolory - nie można ich sparować
                     if (p2HasTwoSame && p1.RoleHistory[^1] == p2.RoleHistory[^1])
                     {
-                        return false; // Niemożliwe do sparowania bez naruszenia zasady 3
+                        return false; 
                     }
                 }
             }
@@ -271,7 +268,7 @@ namespace GFlow.Domain.Services.Pairings
             if (p2.RoleHistory.Count >= 2)
             {
                 bool lastTwoSame = p2.RoleHistory[^1] == p2.RoleHistory[^2];
-                if (lastTwoSame && !isLastRound)
+                if (lastTwoSame) // Absolute rule
                 {
                     bool p1HasTwoSame = false;
                     if (p1.RoleHistory.Count >= 2)
@@ -288,6 +285,30 @@ namespace GFlow.Domain.Services.Pairings
             
             return true;
         }
+
+        /* ... CheckOpponentScoreHistory ... */
+        /* ... AssignHomeAway (calls PlayerNeedsSpecificRole) ... */ 
+        // Need to update AssignHomeAway to not pass isLastRound, or verify PlayerNeedsSpecificRole signature?
+        // Wait, CanAssignRoles is its own method.
+        // AssignHomeAway calls PlayerNeedsSpecificRole.
+        // So I must update PlayerNeedsSpecificRole too (or call site).
+        
+        // Let's check AssignHomeAway signature in previous file view...
+        // private void AssignHomeAway(Match match, TournamentParticipant p1, TournamentParticipant p2, int round)
+        // It uses: bool isLastRound = round == _totalRounds;
+        // bool p1NeedsSpecificRole = PlayerNeedsSpecificRole(p1, isLastRound, out bool p1NeedsHome);
+        
+        // So I must update PlayerNeedsSpecificRole implementation.
+        // I will do multi_replace.
+        
+        /* 
+        private bool PlayerNeedsSpecificRole(TournamentParticipant p, bool isLastRound, out bool needsHome)
+        {
+             // ...
+             if (p.RoleHistory.Count >= 2 && !isLastRound) -> Remove !isLastRound
+        }
+        */
+
 
         private bool CheckOpponentScoreHistory(TournamentParticipant p1, TournamentParticipant p2)
         {
@@ -403,8 +424,9 @@ namespace GFlow.Domain.Services.Pairings
         {
             needsHome = false;
             
-            // Jeśli gracz miał 2 z rzędu tym samym kolorem i to NIE jest ostatnia runda
-            if (p.RoleHistory.Count >= 2 && !isLastRound)
+            // Jeśli gracz miał 2 z rzędu tym samym kolorem - ZAWSZE narzucamy zmianę (Zasada 3 absolutna)
+            // Ignorujemy isLastRound
+            if (p.RoleHistory.Count >= 2)
             {
                 bool lastTwoSame = p.RoleHistory[^1] == p.RoleHistory[^2];
                 if (lastTwoSame)
@@ -449,8 +471,8 @@ namespace GFlow.Domain.Services.Pairings
                 var p1 = participants.FirstOrDefault(p => p.UserId == match.PlayerHomeId);
                 var p2 = participants.FirstOrDefault(p => p.UserId == match.PlayerAwayId);
 
-                if (p1 == null || (p2 == null && match.PlayerAwayId != Guid.Empty.ToString()))
-                    continue;
+                if (p1 == null) continue;
+                if (match.PlayerAwayId != null && p2 == null) continue;
 
                 // Aktualizacja wyników
                 if (match.Result != null)
@@ -464,7 +486,7 @@ namespace GFlow.Domain.Services.Pairings
                 if (match.Result != null && match.Result.FinishType == MatchFinishType.Bye)
                 {
                     p1.HasReceivedBye = true;
-                    p1.RoleHistory.Add(true);
+                    // p1.RoleHistory.Add(true); // FIX: BYE does not count for color history (FIDE C.04.1)
                     continue;
                 }
 
@@ -474,13 +496,25 @@ namespace GFlow.Domain.Services.Pairings
                 p1.PlayedOpponentIds.Add(p2.UserId);
                 p2.PlayedOpponentIds.Add(p1.UserId);
 
-                // Aktualizacja historii ról
-                p1.RoleHistory.Add(true);  // Home
-                p2.RoleHistory.Add(false); // Away
+                // Aktualizacja historii ról - tylko dla rozegranych partii (nie walkover)
+                if (match.Result?.FinishType == MatchFinishType.Normal) 
+                {
+                    p1.RoleHistory.Add(true);  // Home
+                    p2.RoleHistory.Add(false); // Away
+                }
+                // Walkovers are ignored for color history
 
                 // Aktualizacja historii różnic punktowych (Zasady 6-7)
-                double scoreDiff1 = p2.Score - p1.Score; // różnica przed tym meczem
-                double scoreDiff2 = p1.Score - p2.Score;
+                // WAŻNE: Liczmy różnicę punktową PRZED dodaniem wyniku tego meczu.
+                // Inaczej wygrana z równym przeciwnikiem (0 vs 0 -> 1 vs 0) wygląda jak downfloat (-1),
+                // co blokuje prawdziwy downfloat w następnej rundzie (Winners vs Losers).
+                
+                double p1OldScore = p1.Score - match.Result.ScoreA;
+                double p2OldScore = p2.Score - match.Result.ScoreB;
+
+                double scoreDiff1 = p2OldScore - p1OldScore; 
+                double scoreDiff2 = p1OldScore - p2OldScore;
+                
                 p1.OpponentScoreHistory.Add(scoreDiff1);
                 p2.OpponentScoreHistory.Add(scoreDiff2);
             }

@@ -45,28 +45,37 @@ export interface TournamentParams {
   limit?: number;
 }
 
+export interface Game {
+  name: string;
+  code: string;
+}
+
+export interface Participant {
+  id: string;
+  username: string;
+}
+
 export interface Tournament {
   id: string;
   title: string;
-  date: string;
-  emblem: string;
-  game: {
-    name: string;
-    code: string;
-  };
-  location: string;
-  details: string;
-  status: 'active' | 'upcoming' | 'completed';
-  lat: number | null;
-
-  lng: number | null;
+  game: Game; // now using Game object
   organizer: string;
-  systemType: string;
-  numberOfRounds?: number;
+  organizerId: string;
+  moderatorIds: string[];
+  participants: Participant[];
   playerLimit: number;
+  location: string;
+  date: string;
+  status: 'active' | 'upcoming' | 'completed';
+  emblem: string; // "checkmate", "trophy", etc.
+  systemType: string;
+  details?: string;
+  numberOfRounds?: number;
+  layout?: string; // Optional future proofing
+  tieBreakers?: string[];
+  lat?: number | null;
+  lng?: number | null;
 }
-
-
 
 export async function getTournaments(params: TournamentParams = {}) {
   // Map frontend status to backend enum string
@@ -104,8 +113,11 @@ export async function getTournaments(params: TournamentParams = {}) {
       code: t.gameCode || 'all',
     },
     location: t.city || 'Online',
-    details: '',
+    details: t.description || '',
     organizer: t.organizerName,
+    organizerId: t.organizerId, // May be missing in list view, optional or check backend
+    moderatorIds: [], // List view might not need this or send it
+    participants: [], // List view usually doesn't send full list
     systemType: t.systemType,
     numberOfRounds: t.numberOfRounds,
     playerLimit: t.playerLimit,
@@ -137,8 +149,11 @@ export async function getTournamentById(id: string): Promise<Tournament | null> 
         code: t.gameCode || 'all',
       },
       location: t.city || 'Online',
-      details: '',
+      details: t.description || t.details || '',
       organizer: t.organizerName || t.OrganizerName,
+      organizerId: t.organizerId || t.OrganizerId,
+      moderatorIds: t.moderatorIds || t.ModeratorIds || [],
+      participants: t.participants || t.Participants || [],
       systemType: t.systemType || t.SystemType,
       numberOfRounds: t.numberOfRounds || t.NumberOfRounds,
       playerLimit: t.playerLimit || t.PlayerLimit,
@@ -177,6 +192,7 @@ export interface CreateTournamentRequest {
   emblem?: string;
   description?: string;
   numberOfRounds?: number;
+  tieBreakers?: string[];
 }
 
 export async function createTournament(data: CreateTournamentRequest) {
@@ -190,9 +206,102 @@ export async function createTournament(data: CreateTournamentRequest) {
 
 export async function addModerator(tournamentId: string, userId: string) {
   try {
-    const response = await api.post(`/tournament/${tournamentId}/moderator/${userId}`);
+    const response = await api.post(`/tournament/${tournamentId}/moderators/${userId}`);
     return response;
   } catch (error) {
     handleError(error);
+  }
+}
+
+export async function searchUsers(query: string) {
+  try {
+    const response = await api.get(`/user/search?query=${query}`);
+    return response.data;
+  } catch (error) {
+    handleError(error);
+    return [];
+  }
+}
+
+export async function startNextRound(tournamentId: string) {
+  try {
+    const response = await api.post(`/tournament/${tournamentId}/rounds/start`);
+    return response.status === 200;
+  } catch (error) {
+    handleError(error);
+    return false;
+  }
+}
+
+export interface StandingsEntry {
+  userId: string;
+  username: string;
+  score: number;
+  ranking: number;
+  matchesPlayed: number;
+  wins: number;
+  draws: number;
+  losses: number;
+  isWithdrawn: boolean;
+  buchholz: number;
+  tieBreakerValues: Record<string, number>;
+}
+
+export interface Match {
+  id: string;
+  tournamentId: string;
+  playerHomeId: string;
+  playerAwayId: string;
+  playerHomeName?: string;
+  playerAwayName?: string;
+  roundNumber: number;
+  tableNumber: number;
+  result?: {
+      scoreA: number;
+      scoreB: number;
+      finishType: 'Normal' | 'Walkover' | 'Bye';
+  };
+  isCompleted: boolean;
+}
+
+// Match Result Submission
+export const submitMatchResult = async (matchId: string, scoreA: number, scoreB: number, finishType: string = 'Normal'): Promise<boolean> => {
+  if (!api) return false;
+  try {
+      await api.post(`/Tournament/matches/${matchId}/result`, { scoreA, scoreB, finishType });
+      return true;
+  } catch (error) {
+      console.error("Match result error:", error);
+      return false;
+  }
+};
+
+export async function getStandings(tournamentId: string): Promise<StandingsEntry[]> {
+  try {
+    const response = await api.get(`/tournament/${tournamentId}/standings`);
+    return response.data;
+  } catch (error) {
+    handleError(error);
+    return [];
+  }
+}
+
+export async function getMatches(tournamentId: string): Promise<Match[]> {
+  try {
+    const response = await api.get(`/tournament/${tournamentId}/matches`);
+    return response.data;
+  } catch (error) {
+    handleError(error);
+    return [];
+  }
+}
+
+export async function addParticipant(tournamentId: string, username: string) {
+  try {
+    const response = await api.post(`/tournament/${tournamentId}/participants`, { username });
+    return response.status === 200;
+  } catch (error) {
+    handleError(error);
+    return false;
   }
 }

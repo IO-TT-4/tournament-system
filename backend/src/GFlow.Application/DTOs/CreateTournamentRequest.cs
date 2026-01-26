@@ -12,6 +12,7 @@ namespace GFlow.Application.DTOs
         public DateTime EndDate {get; set;}
         public string? Description { get; set; }
         public int? NumberOfRounds { get; set; }
+        public List<string>? TieBreakers { get; set; }
         
         // Location Details
         public string? CountryCode { get; set; }
@@ -22,6 +23,6 @@ namespace GFlow.Application.DTOs
         public string? GameCode { get; set; }
         public string? GameName { get; set; }
 
-        public string Emblem {get; set;}
+        public string? Emblem {get; set;}
     }
 }

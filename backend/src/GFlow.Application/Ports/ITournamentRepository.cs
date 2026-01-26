@@ -34,6 +34,7 @@ namespace GFlow.Application.Ports
         public Task SaveMatches(IEnumerable<Match> matches);
 
         public Task<bool> UpdateParticipant(TournamentParticipant participant);
+        public Task AddParticipant(TournamentParticipant participant);
         public Task<TournamentParticipant?> GetParticipant(string tournamentId, string userId);
         
         // Changing to Task for proper await capability

@@ -11,5 +11,6 @@ namespace GFlow.Application.Ports
         public Task<User?> Update(User user);
         public Task<User?> GetByRefreshToken(string refreshToken);
         public Task<IEnumerable<User>> GetAll();
+        public Task<IEnumerable<User>> Search(string term);
     }
 }

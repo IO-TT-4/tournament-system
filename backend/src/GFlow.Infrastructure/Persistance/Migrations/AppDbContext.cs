@@ -44,12 +44,21 @@ namespace GFlow.Infrastructure.Persistance
                  .WithMany()
                  .UsingEntity(j => j.ToTable("TournamentModerators"));
 
+            // Npgsql supports List<string> -> text[] natively, no conversion needed.
+            // Converting to JSON broke the read because column is already text[].
+
             // W AppDbContext.cs
             
 
             // W OnModelCreating
-            modelBuilder.Entity<TournamentParticipant>()
-                .HasKey(tp => new { tp.TournamentId, tp.UserId }); // Klucz kompozytowy
+            modelBuilder.Entity<TournamentParticipant>(entity =>
+            {
+                entity.HasKey(tp => new { tp.TournamentId, tp.UserId });
+                entity.Ignore(tp => tp.PlayedOpponentIds);
+                entity.Ignore(tp => tp.RoleHistory);
+                entity.Ignore(tp => tp.OpponentScoreHistory);
+                entity.Ignore(tp => tp.UnavailableRounds);
+            });
 
             // 3. Konfiguracja Match
             modelBuilder.Entity<Match>(entity =>
@@ -73,19 +82,14 @@ namespace GFlow.Infrastructure.Persistance
                 entity.HasOne<User>()
                     .WithMany()
                     .HasForeignKey(m => m.PlayerAwayId)
+                    .IsRequired(false)
                     .OnDelete(DeleteBehavior.Restrict);
 
-                // 4. Konfiguracja Value Object: MatchResult (Owned Type)
-                entity.OwnsOne(m => m.Result, result =>
-                {
-                    result.Property(r => r.ScoreA).HasColumnName("ScoreA");
-                    result.Property(r => r.ScoreB).HasColumnName("ScoreB");
-                    
-                    // Zapisujemy Enum jako string dla czytelności w DB
-                    result.Property(r => r.FinishType)
-                          .HasColumnName("FinishType")
-                          .HasConversion<string>();
-                });
+                entity.Ignore(m => m.Result);
+
+                entity.Property(m => m.ScoreA).HasColumnName("ScoreA");
+                entity.Property(m => m.ScoreB).HasColumnName("ScoreB");
+                entity.Property(m => m.FinishType).HasColumnName("FinishType").HasConversion<string>();
             });
 
             // 5. Konfiguracja MatchEvent

@@ -16,9 +16,12 @@ namespace GFlow.Application.Ports
         public Task<bool> DeleteTournamentAsync(string id);
         
         public Task<bool> WithdrawParticipantAsync(string tournamentId, string userId);
-        public Task<bool> SubmitMatchResultAsync(string matchId, double scoreA, double scoreB, string? requestingUserId = null);
+        public Task<bool> SubmitMatchResultAsync(string matchId, double scoreA, double scoreB, string? requestingUserId = null, string finishType = "Normal");
         public Task<List<StandingsEntry>> GetStandingsAsync(string tournamentId);
         
         public Task<bool> AddModeratorAsync(string tournamentId, string userId);
+        public Task<bool> StartNextRoundAsync(string tournamentId);
+        public Task<List<MatchDto>> GetMatchesAsync(string tournamentId);
+        public Task<bool> AddParticipantAsync(string tournamentId, string username);
     }
 }

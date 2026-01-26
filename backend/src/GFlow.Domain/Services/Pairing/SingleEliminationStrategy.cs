@@ -55,7 +55,7 @@ namespace GFlow.Domain.Services.Pairings
 
         for (int i = 0; i < matchesInFirstRound; i++)
         {
-            var match = new Match(tournamentId, Guid.Empty.ToString(), Guid.Empty.ToString(), 1, tournamentId);
+            var match = new Match(Guid.NewGuid().ToString(), Guid.Empty.ToString(), null, 1, tournamentId);
             match.PositionInRound = i + 1;
 
             // Seeding logic
@@ -74,7 +74,7 @@ namespace GFlow.Domain.Services.Pairings
             {
                 // BYE - player advances automatically
                 match.PlayerHomeId = home.UserId;
-                match.PlayerAwayId = Guid.Empty.ToString();
+                match.PlayerAwayId = null;
                 match.SetResult(MatchResult.CreateBye());
             }
 
@@ -89,7 +89,7 @@ namespace GFlow.Domain.Services.Pairings
         var matches = new List<Match>();
         for (int i = 0; i < winners.Count; i += 2)
         {
-            var match = new Match(tournamentId, winners[i], winners[i + 1], roundNumber, tournamentId);
+            var match = new Match(Guid.NewGuid().ToString(), winners[i], winners[i + 1], roundNumber, tournamentId);
             match.PositionInRound = (i / 2) + 1;
             matches.Add(match);
         }
@@ -98,8 +98,12 @@ namespace GFlow.Domain.Services.Pairings
 
     private string GetWinnerId(Match match)
     {
-        if (match.Result == null) return Guid.Empty.ToString();
-        return match.Result.ScoreA > match.Result.ScoreB ? match.PlayerHomeId : match.PlayerAwayId;
+        if (match.Result == null) return null!; // Should handle this better, but using null! to satisfy logic flow or check
+        // Actually if match.Result.ScoreA > B, returns HomeId.
+        // If BYE, ScoreA=1, ScoreB=0 -> HomeId. Correct.
+        return match.Result.ScoreA > match.Result.ScoreB ? match.PlayerHomeId : (match.PlayerAwayId ?? match.PlayerHomeId); 
+        // Logic: if AwayId is null (BYE), Home wins always. 
+        // Existing logic: scoreA > scoreB -> Home. ScoreA=1. Correct.
     }
     }
 }

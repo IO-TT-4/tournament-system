@@ -115,7 +115,7 @@ function Tournaments() {
               <div className="city-input">
                 <input
                   type="text"
-                  placeholder={t('cityOrCountry')}
+                  placeholder={t('city')}
                   value={cityQuery}
                   onChange={(e) => setCityQuery(e.target.value)}
                 />
