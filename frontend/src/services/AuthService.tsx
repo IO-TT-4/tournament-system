@@ -53,6 +53,8 @@ export interface Game {
 export interface Participant {
   id: string;
   username: string;
+  isWithdrawn?: boolean;
+  status?: string; // Confirmed, PendingApproval, Waitlist, Withdrawn, Rejected
 }
 
 export interface Tournament {
@@ -75,6 +77,12 @@ export interface Tournament {
   tieBreakers?: string[];
   lat?: number | null;
   lng?: number | null;
+  // Scoring
+  winPoints?: number;
+  drawPoints?: number;
+  lossPoints?: number;
+  registrationMode?: string;
+  enableMatchEvents?: boolean;
 }
 
 export async function getTournaments(params: TournamentParams = {}) {
@@ -124,6 +132,10 @@ export async function getTournaments(params: TournamentParams = {}) {
     status: t.status === 'ONGOING' ? 'active' : t.status === 'FINISHED' ? 'completed' : 'upcoming',
     lat: t.lat,
     lng: t.lng,
+    winPoints: t.winPoints || t.WinPoints,
+    drawPoints: t.drawPoints || t.DrawPoints,
+    lossPoints: t.lossPoints || t.LossPoints,
+    enableMatchEvents: t.enableMatchEvents || t.EnableMatchEvents
   }));
 
   return {
@@ -153,13 +165,23 @@ export async function getTournamentById(id: string): Promise<Tournament | null> 
       organizer: t.organizerName || t.OrganizerName,
       organizerId: t.organizerId || t.OrganizerId,
       moderatorIds: t.moderatorIds || t.ModeratorIds || [],
-      participants: t.participants || t.Participants || [],
+      participants: t.participants ? t.participants.map((p: any) => ({
+          id: p.id || p.Id,
+          username: p.username || p.Username,
+          isWithdrawn: p.isWithdrawn || p.IsWithdrawn,
+          status: p.status || p.Status || 'Confirmed' // Default if not present
+      })) : [],
       systemType: t.systemType || t.SystemType,
       numberOfRounds: t.numberOfRounds || t.NumberOfRounds,
       playerLimit: t.playerLimit || t.PlayerLimit,
       status: t.status === 'ONGOING' ? 'active' : t.status === 'FINISHED' ? 'completed' : 'upcoming',
       lat: t.lat,
       lng: t.lng,
+      winPoints: t.winPoints || t.WinPoints,
+      drawPoints: t.drawPoints || t.DrawPoints,
+      lossPoints: t.lossPoints || t.LossPoints,
+      registrationMode: t.registrationMode || t.RegistrationMode || 'Open',
+      enableMatchEvents: t.enableMatchEvents || t.EnableMatchEvents
     };
   } catch (error) {
     handleError(error);
@@ -193,6 +215,10 @@ export interface CreateTournamentRequest {
   description?: string;
   numberOfRounds?: number;
   tieBreakers?: string[];
+  winPoints?: number;
+  drawPoints?: number;
+  lossPoints?: number;
+  enableMatchEvents?: boolean;
 }
 
 export async function createTournament(data: CreateTournamentRequest) {
@@ -213,10 +239,64 @@ export async function addModerator(tournamentId: string, userId: string) {
   }
 }
 
+export async function removeModerator(tournamentId: string, userId: string) {
+  try {
+    const response = await api.delete(`/tournament/${tournamentId}/moderators/${userId}`);
+    return response.status === 204 || response.status === 200;
+  } catch (error) {
+    handleError(error);
+    return false;
+  }
+}
+
 export async function searchUsers(query: string) {
   try {
     const response = await api.get(`/user/search?query=${query}`);
     return response.data;
+  } catch (error) {
+    handleError(error);
+    return [];
+  }
+}
+
+export async function getUser(id: string) {
+  try {
+    const response = await api.get(`/user/${id}`);
+    return response.data;
+  } catch (error) {
+    handleError(error);
+    return null;
+  }
+}
+
+export async function getUserTournaments(userId: string): Promise<Tournament[]> {
+  try {
+    const response = await api.get(`/user/${userId}/tournaments`);
+    // Map backend response to frontend Tournament interface
+    return response.data.map((t: any) => ({
+      id: t.id,
+      title: t.name,
+      date: new Date(t.startDate).toLocaleDateString(),
+      emblem: t.emblem || 'default',
+      game: {
+        name: t.gameName || 'Other',
+        code: t.gameCode || 'all',
+      },
+      location: t.city || 'Online',
+      details: t.description || '',
+      organizer: t.organizerName,
+      organizerId: t.organizerId,
+      systemType: t.systemType,
+      numberOfRounds: t.numberOfRounds,
+      playerLimit: t.playerLimit,
+      status: t.status === 'ONGOING' ? 'active' : t.status === 'FINISHED' ? 'completed' : 'upcoming',
+      lat: t.lat,
+      lng: t.lng,
+      winPoints: t.winPoints || t.WinPoints,
+      drawPoints: t.drawPoints || t.DrawPoints,
+      lossPoints: t.lossPoints || t.LossPoints,
+      enableMatchEvents: t.enableMatchEvents || t.EnableMatchEvents
+    }));
   } catch (error) {
     handleError(error);
     return [];
@@ -303,5 +383,117 @@ export async function addParticipant(tournamentId: string, username: string) {
   } catch (error) {
     handleError(error);
     return false;
+  }
+}
+
+export async function removeParticipant(tournamentId: string, userId: string) {
+  try {
+    const response = await api.delete(`/tournament/${tournamentId}/participants/${userId}`);
+    return response.status === 204 || response.status === 200;
+  } catch (error) {
+    handleError(error);
+    return false;
+  }
+}
+
+export async function withdrawParticipant(tournamentId: string, userId: string) {
+  try {
+    const response = await api.post(`/tournament/${tournamentId}/participants/${userId}/withdraw`);
+    return response.status === 204 || response.status === 200;
+  } catch (error) {
+    handleError(error);
+    return false;
+  }
+}
+
+export interface UpdateTournamentRequest {
+  name?: string;
+  startDate?: Date;
+  endDate?: Date;
+  playerLimit?: number;
+  emblem?: string;
+  description?: string;
+  winPoints?: number;
+  drawPoints?: number;
+  lossPoints?: number;
+  enableMatchEvents?: boolean;
+}
+
+export async function updateTournament(id: string, data: UpdateTournamentRequest) {
+  try {
+    const response = await api.put(`/tournament/${id}`, data);
+    return response.data;
+  } catch (error) {
+    handleError(error);
+    return null;
+  }
+}
+
+export async function joinTournament(tournamentId: string) {
+  try {
+    const response = await api.post(`/tournament/${tournamentId}/join`);
+    return response.data; // { status: "Joined" | "Waitlist" | "Pending" }
+  } catch (error) {
+    handleError(error);
+    return null;
+  }
+}
+
+export async function approveParticipant(tournamentId: string, userId: string) {
+  try {
+    const response = await api.post(`/tournament/${tournamentId}/participants/${userId}/approve`);
+    return response.status === 200;
+  } catch (error) {
+    handleError(error);
+    return false;
+  }
+}
+
+export async function rejectParticipant(tournamentId: string, userId: string) {
+  try {
+    const response = await api.post(`/tournament/${tournamentId}/participants/${userId}/reject`);
+    return response.status === 200;
+  } catch (error) {
+    handleError(error);
+    return false;
+  }
+}
+
+export interface AuditLog {
+  id: string;
+  matchId: string;
+  oldScoreA: number | null;
+  oldScoreB: number | null;
+  newScoreA: number;
+  newScoreB: number;
+  modifiedBy: string;
+  modifiedAt: string;
+  changeType: string;
+}
+
+export interface TournamentAuditLog {
+  id: string;
+  tournamentId: string;
+  actionType: string;
+  targetUserId?: string;
+  targetUsername?: string;
+  performedById: string;
+  performedByUsername?: string;
+  details?: string;
+  timestamp: string;
+}
+
+export interface AuditResponse {
+  matchAudits: AuditLog[];
+  tournamentAudits: TournamentAuditLog[];
+}
+
+export async function getAuditLogs(tournamentId: string): Promise<AuditResponse> {
+  try {
+    const response = await api.get(`/tournament/${tournamentId}/audit`);
+    return response.data;
+  } catch (error) {
+    handleError(error);
+    return { matchAudits: [], tournamentAudits: [] };
   }
 }

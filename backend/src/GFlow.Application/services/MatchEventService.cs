@@ -48,6 +48,21 @@ namespace GFlow.Application.Services
                 Metadata = request.Metadata
             };
 
+            // Auto-update match score if EventType is GOAL
+            if (request.EventType == "GOAL" || request.EventType == "GOAL_HOME" || request.EventType == "GOAL_AWAY")
+            {
+                if (request.EventType == "GOAL_HOME" || (request.EventType == "GOAL" && request.PlayerId == match.PlayerHomeId))
+                {
+                    match.ScoreA = (match.ScoreA ?? 0) + 1;
+                }
+                else if (request.EventType == "GOAL_AWAY" || (request.EventType == "GOAL" && request.PlayerId == match.PlayerAwayId))
+                {
+                    match.ScoreB = (match.ScoreB ?? 0) + 1;
+                }
+                
+                await _tournamentRepo.UpdateMatch(match);
+            }
+
             return await _eventRepo.Add(matchEvent);
         }
 

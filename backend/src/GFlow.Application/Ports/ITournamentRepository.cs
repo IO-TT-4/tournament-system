@@ -35,9 +35,18 @@ namespace GFlow.Application.Ports
 
         public Task<bool> UpdateParticipant(TournamentParticipant participant);
         public Task AddParticipant(TournamentParticipant participant);
+        public Task<bool> DeleteParticipant(string tournamentId, string userId);
         public Task<TournamentParticipant?> GetParticipant(string tournamentId, string userId);
         
         // Changing to Task for proper await capability
         public Task UpdateMatch(Match match);
+        public Task AddMatchResultAudit(MatchResultAudit audit);
+        public Task<List<MatchResultAudit>> GetMatchResultAudits(string tournamentId);
+        
+        // General tournament audit logs
+        public Task AddTournamentAuditAsync(TournamentAuditLog log);
+        public Task<List<TournamentAuditLog>> GetTournamentAuditsAsync(string tournamentId);
+        
+        public Task<List<Tournament>> GetTournamentsByUserId(string userId);
     }
 }

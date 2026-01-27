@@ -25,7 +25,7 @@ interface AuthContextType {
 const UserContext = createContext<AuthContextType | undefined>(undefined);
 
 export function UserProvider({ children }: { children: React.ReactNode }) {
-  const { t } = useTranslation('toast');
+  const { t } = useTranslation('mainPage');
 
   const navigate = useNavigate();
   const [token, setToken] = useState<string | null>(null);
@@ -65,7 +65,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
           localStorage.setItem('user', JSON.stringify(userObj));
           setToken(res?.data.token);
           setUser(userObj);
-          toast.success(`${t('registerSuccess')}!`);
+          toast.success(`${t('auth.registerSuccess')}!`);
           navigate('/');
         }
       })
@@ -90,7 +90,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
           localStorage.setItem('user', JSON.stringify(userObj));
           setToken(res?.data.token);
           setUser(userObj);
-          toast.success(`${t('loginSuccess')}!`);
+          toast.success(`${t('auth.loginSuccess')}!`);
           navigate('/');
         }
       })
@@ -111,7 +111,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
     setToken(null);
     delete axios.defaults.headers.common['Authorization'];
     navigate('/');
-    toast.success(t('logoutSuccess'));
+    toast.success(t('auth.logoutSuccess'));
   }
 
   return (

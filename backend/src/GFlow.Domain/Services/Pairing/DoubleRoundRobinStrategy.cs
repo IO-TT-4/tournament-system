@@ -66,8 +66,8 @@ namespace GFlow.Domain.Services.Pairings
                         if (isReverse) shouldSwap = !shouldSwap;
 
                         var match = shouldSwap
-                            ? new Match(tournamentId, p1.UserId, p2.UserId, currentRoundNumber, tournamentId)
-                            : new Match(tournamentId, p2.UserId, p1.UserId, currentRoundNumber, tournamentId);
+                            ? new Match(Guid.NewGuid().ToString(), p1.UserId, p2.UserId, currentRoundNumber, tournamentId)
+                            : new Match(Guid.NewGuid().ToString(), p2.UserId, p1.UserId, currentRoundNumber, tournamentId);
 
                         cycleMatches.Add(match);
                     }
@@ -75,7 +75,7 @@ namespace GFlow.Domain.Services.Pairings
                     {
                         // BYE Handling
                         var activePlayerId = p1.UserId == Guid.Empty.ToString() ? p2.UserId : p1.UserId;
-                        var byeMatch = new Match(tournamentId, activePlayerId, Guid.Empty.ToString(), currentRoundNumber, tournamentId);
+                        var byeMatch = new Match(Guid.NewGuid().ToString(), activePlayerId, null, currentRoundNumber, tournamentId);
                         byeMatch.SetResult(MatchResult.CreateBye());
                         cycleMatches.Add(byeMatch);
                     }

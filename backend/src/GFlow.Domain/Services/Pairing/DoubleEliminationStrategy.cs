@@ -158,9 +158,21 @@ namespace GFlow.Domain.Services.Pairings
             var matches = new List<Match>();
             for (int i = 0; i < winners.Count; i += 2)
             {
-                var match = new Match(Guid.NewGuid().ToString(), winners[i], winners[i + 1], roundNumber, tournamentId);
-                match.PositionInRound = (i / 2) + 1;
-                matches.Add(match);
+                if (i + 1 < winners.Count)
+                {
+                    var match = new Match(Guid.NewGuid().ToString(), winners[i], winners[i + 1], roundNumber, tournamentId);
+                    match.PositionInRound = (i / 2) + 1;
+                    matches.Add(match);
+                }
+                else
+                {
+                    // Odd one out - technically shouldn't happen in standard WB power-of-2, but safe to handle with BYE or wait?
+                    // Usually WB is balanced. If not, giving BYE.
+                     var match = new Match(Guid.NewGuid().ToString(), winners[i], null, roundNumber, tournamentId);
+                     match.PositionInRound = (i / 2) + 1;
+                     match.SetResult(MatchResult.CreateBye());
+                     matches.Add(match);
+                }
             }
             return matches;
         }
@@ -170,9 +182,20 @@ namespace GFlow.Domain.Services.Pairings
             var matches = new List<Match>();
             for (int i = 0; i < wbLosers.Count; i += 2)
             {
-                var match = new Match(Guid.NewGuid().ToString(), wbLosers[i], wbLosers[i + 1], roundNumber, tournamentId);
-                match.PositionInRound = LOSERS_BRACKET_OFFSET + (i / 2) + 1;
-                matches.Add(match);
+                if (i + 1 < wbLosers.Count)
+                {
+                    var match = new Match(Guid.NewGuid().ToString(), wbLosers[i], wbLosers[i + 1], roundNumber, tournamentId);
+                    match.PositionInRound = LOSERS_BRACKET_OFFSET + (i / 2) + 1;
+                    matches.Add(match);
+                }
+                else
+                {
+                    // Odd loser (e.g. from BYE structure) gets a BYE in LB
+                     var match = new Match(Guid.NewGuid().ToString(), wbLosers[i], null, roundNumber, tournamentId);
+                     match.PositionInRound = LOSERS_BRACKET_OFFSET + (i / 2) + 1;
+                     match.SetResult(MatchResult.CreateBye());
+                     matches.Add(match);
+                }
             }
             return matches;
         }
@@ -180,14 +203,43 @@ namespace GFlow.Domain.Services.Pairings
         private IEnumerable<Match> GenerateLBWinnersWithWBLosers(string tournamentId, List<string> lbWinners, List<string> wbLosers, int roundNumber)
         {
             var matches = new List<Match>();
-            // Standard pairing: first LB winner vs first WB loser, etc.
-            // Usually we need to be careful with seeding here, but for now simple positional match.
-            for (int i = 0; i < Math.Min(lbWinners.Count, wbLosers.Count); i++)
+            
+            // We should pairs them. If one list is longer, the extras need to play each other or get BYEs?
+            // Standard DE: WB Losers drop into specific slots. LB Winners play them.
+            // If counts mismatch, it means the bracket isn't perfectly balanced (BYEs happened).
+            // Logic: Pair 1-to-1 as much as possible.
+            // prioritize pairing Max Rank vs Max Rank? Or just order.
+            
+            int commonCount = Math.Min(lbWinners.Count, wbLosers.Count);
+            int matchIndex = 0;
+            
+            for (int i = 0; i < commonCount; i++)
             {
                 var match = new Match(Guid.NewGuid().ToString(), lbWinners[i], wbLosers[i], roundNumber, tournamentId);
-                match.PositionInRound = LOSERS_BRACKET_OFFSET + i + 1;
+                match.PositionInRound = LOSERS_BRACKET_OFFSET + (++matchIndex);
                 matches.Add(match);
             }
+            
+            // Handle leftovers from LB Winners (if any)
+            for (int i = commonCount; i < lbWinners.Count; i++)
+            {
+                // They have no one to play from WB. They get a BYE for this round effectively (advance).
+                var match = new Match(Guid.NewGuid().ToString(), lbWinners[i], null, roundNumber, tournamentId);
+                match.PositionInRound = LOSERS_BRACKET_OFFSET + (++matchIndex);
+                match.SetResult(MatchResult.CreateBye());
+                matches.Add(match);
+            }
+            
+            // Handle leftovers from WB Losers (if any)
+            for (int i = commonCount; i < wbLosers.Count; i++)
+            {
+                // Dropped but no LB opponent. BYE.
+                var match = new Match(Guid.NewGuid().ToString(), wbLosers[i], null, roundNumber, tournamentId);
+                match.PositionInRound = LOSERS_BRACKET_OFFSET + (++matchIndex);
+                match.SetResult(MatchResult.CreateBye());
+                matches.Add(match);
+            }
+
             return matches;
         }
 
@@ -196,9 +248,20 @@ namespace GFlow.Domain.Services.Pairings
             var matches = new List<Match>();
             for (int i = 0; i < lbWinners.Count; i += 2)
             {
-                var match = new Match(Guid.NewGuid().ToString(), lbWinners[i], lbWinners[i + 1], roundNumber, tournamentId);
-                match.PositionInRound = LOSERS_BRACKET_OFFSET + (i / 2) + 1;
-                matches.Add(match);
+                if (i + 1 < lbWinners.Count)
+                {
+                    var match = new Match(Guid.NewGuid().ToString(), lbWinners[i], lbWinners[i + 1], roundNumber, tournamentId);
+                    match.PositionInRound = LOSERS_BRACKET_OFFSET + (i / 2) + 1;
+                    matches.Add(match);
+                }
+                else
+                {
+                    // Odd LB winner gets Bye
+                     var match = new Match(Guid.NewGuid().ToString(), lbWinners[i], null, roundNumber, tournamentId);
+                     match.PositionInRound = LOSERS_BRACKET_OFFSET + (i / 2) + 1;
+                     match.SetResult(MatchResult.CreateBye());
+                     matches.Add(match);
+                }
             }
             return matches;
         }

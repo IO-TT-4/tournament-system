@@ -1,0 +1,14 @@
+  Trwa określanie projektów do przywrócenia...
+  Wszystkie projekty są aktualne na potrzeby przywrócenia.
+  GFlow.Domain -> E:\repos\IO-IT-4\tournament-system\backend\src\GFlow.Domain\bin\Debug\net9.0\GFlow.Domain.dll
+E:\repos\IO-IT-4\tournament-system\backend\src\GFlow.Application\DTOs\UpdateTournamentRequest.cs(15,16): error CS0246: Nie można znaleźć nazwy typu lub przestrzeni nazw „RegistrationMode” (brak dyrektywy using lub odwołania do zestawu?) [E:\repos\IO-IT-4\tournament-system\backend\src\GFlow.Application\GFlow.Application.csproj]
+
+Kompilacja NIE POWIODŁA SIĘ.
+
+E:\repos\IO-IT-4\tournament-system\backend\src\GFlow.Application\DTOs\UpdateTournamentRequest.cs(15,16): error CS0246: Nie można znaleźć nazwy typu lub przestrzeni nazw „RegistrationMode” (brak dyrektywy using lub odwołania do zestawu?) [E:\repos\IO-IT-4\tournament-system\backend\src\GFlow.Application\GFlow.Application.csproj]
+    Ostrzeżenia: 0
+    Liczba błędów: 1
+
+Czas, który upłynął: 00:00:00.90
+
+Dostępne są aktualizacje obciążenia. Uruchom polecenie `dotnet workload list`, aby uzyskać więcej informacji.

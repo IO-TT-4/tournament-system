@@ -16,7 +16,6 @@ namespace GFlow.Domain.ValueObjects
         public List<double> OpponentScoreHistory { get; } = new();
         
         // NEW: Withdrawal and Unavailability logic
-        public bool IsWithdrawn { get; set; }
         public List<int> UnavailableRounds { get; } = new();
 
         public int RoleBalance => RoleHistory.Count(r => r) - RoleHistory.Count(r => !r);
@@ -30,7 +29,8 @@ namespace GFlow.Domain.ValueObjects
             Score = 0;
             Ranking = ranking;
             TournamentId = string.Empty;
-            IsWithdrawn = false;
+            TournamentId = string.Empty;
+            Status = ParticipantStatus.Confirmed;
         }
         
         [SetsRequiredMembers]
@@ -44,8 +44,22 @@ namespace GFlow.Domain.ValueObjects
             RoleHistory = new List<bool>(other.RoleHistory);
             OpponentScoreHistory = new List<double>(other.OpponentScoreHistory);
             TournamentId = other.TournamentId;
-            IsWithdrawn = other.IsWithdrawn;
+            TournamentId = other.TournamentId;
+            Status = other.Status;
             UnavailableRounds = new List<int>(other.UnavailableRounds);
+        }
+
+        public ParticipantStatus Status { get; set; } = ParticipantStatus.Confirmed;
+
+        // Backend Compatibility Proxy (Not Mapped to DB - See AppDbContext)
+        public bool IsWithdrawn
+        {
+            get => Status == ParticipantStatus.Withdrawn;
+            set 
+            {
+                if (value) Status = ParticipantStatus.Withdrawn;
+                else if (Status == ParticipantStatus.Withdrawn) Status = ParticipantStatus.Confirmed;
+            }
         }
     }
 }

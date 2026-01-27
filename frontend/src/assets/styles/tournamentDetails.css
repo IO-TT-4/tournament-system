@@ -163,6 +163,7 @@
   gap: 1rem;
 }
 
+
 .p-avatar {
   width: 40px;
   height: 40px;
@@ -172,4 +173,75 @@
   justify-content: center;
   align-items: center;
   font-weight: bold;
+}
+
+/* Standings Table */
+.standings-table-container {
+    overflow-x: auto;
+}
+/* ... rest matches what I added ... */
+
+.standings-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1rem;
+}
+
+.standings-table th {
+    padding: 10px;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    text-align: left;
+    color: #aaa;
+    font-weight: 500;
+}
+
+.standings-table td {
+    padding: 10px;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+
+.standings-row:nth-child(even) {
+    background: rgba(255,255,255,0.02);
+}
+
+.standings-row:hover {
+    background: rgba(255,255,255,0.05);
+}
+
+.st-player-cell {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+}
+
+.st-avatar {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: #3498db;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 0.8rem;
+    font-weight: bold;
+}
+
+.st-score {
+    font-weight: bold;
+    color: #f1c40f;
+}
+
+.st-tiebreaker {
+    color: #aaa;
+}
+
+.st-withdrawn {
+    color: #ff6b6b;
+    font-size: 0.8rem;
+    margin-left: 5px;
+}
+
+.st-struck {
+    text-decoration: line-through;
 }

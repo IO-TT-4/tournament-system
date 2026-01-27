@@ -61,12 +61,76 @@ namespace GFlow.Api.Controllers
                 return NotFound($"Tournament with ID {id} not found.");
             }
             
-            return Ok(MapToResponse(tournament));
+            var response = MapToResponse(tournament);
+
+            
+            // Enrich participants with Status from Service
+            // (Previously used Standings, but that only shows active/withdrawn players in ranking, not pending/waitlist)
+            var details = await _tournamentService.GetParticipantsDetailsAsync(id);
+            if (details.Any())
+            {
+                response.Participants = details;
+                response.ParticipantCount = details.Count(p => p.Status == "Confirmed"); // Correct count for UI limit display
+            }
+            
+            return Ok(response);
+        }
+
+        [HttpPost("{id}/join")]
+        [Authorize]
+        public async Task<ActionResult> Join(string id)
+        {
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            if (userId == null) return Unauthorized();
+
+            var result = await _tournamentService.JoinTournamentAsync(id, userId);
+            
+            if (result == "NotFound") return NotFound("Tournament not found.");
+            if (result == "AlreadyJoined") return BadRequest("You are already joined or have a pending request.");
+            
+            return Ok(new { Status = result }); // "Joined", "Pending", "Waitlist"
+        }
+
+        [HttpPost("{id}/participants/{userId}/approve")]
+        [Authorize]
+        public async Task<ActionResult> ApproveParticipant(string id, string userId)
+        {
+             // Permission check
+            var currentUser = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            if (currentUser == null) return Unauthorized();
+
+            var tournament = await _tournamentService.GetTournament(id);
+            if (tournament == null) return NotFound();
+            if (tournament.OrganizerId != currentUser) return Forbid();
+
+            var success = await _tournamentService.ProcessJoinRequestAsync(id, userId, true, currentUser);
+            if (!success) return BadRequest("Could not approve. Tournament might be full.");
+            
+            return Ok();
+        }
+
+        [HttpPost("{id}/participants/{userId}/reject")]
+        [Authorize]
+        public async Task<ActionResult> RejectParticipant(string id, string userId)
+        {
+             // Permission check
+            var currentUser = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            if (currentUser == null) return Unauthorized();
+
+            var tournament = await _tournamentService.GetTournament(id);
+            if (tournament == null) return NotFound();
+            if (tournament.OrganizerId != currentUser) return Forbid();
+
+            var success = await _tournamentService.ProcessJoinRequestAsync(id, userId, false, currentUser);
+            if (!success) return BadRequest("Could not reject (not found?)."); // Should usually succeed
+            
+            return Ok();
         }
 
         [HttpGet]
         public async Task<ActionResult<TournamentListResponse>> GetFiltered([FromQuery] TournamentFilterParams filterParams)
         {
+            // ... existing GetFiltered code ...
             // Capture user IP for geolocation
             filterParams.UserIp = HttpContext.Connection.RemoteIpAddress?.ToString();
             
@@ -94,7 +158,6 @@ namespace GFlow.Api.Controllers
             }
 
             return Ok(new TournamentListResponse
-
             {
                 Data = responseData,
                 TotalCount = total,
@@ -116,9 +179,6 @@ namespace GFlow.Api.Controllers
             return Ok();
         }
 
-        [HttpGet("upcoming")]
-
-
         [HttpPut("{id}")]
         [Authorize]
         public async Task<ActionResult<TournamentResponse>> Update(string id, [FromBody] UpdateTournamentRequest request)
@@ -129,7 +189,19 @@ namespace GFlow.Api.Controllers
                 // Can be not found or validation error, simplifying here
                 return NotFound($"Tournament with ID {id} not found or invalid data.");
             }
-            return Ok(MapToResponse(tournament));
+
+            var response = MapToResponse(tournament);
+            
+            // Enrich participants
+            // Enrich participants
+            var details = await _tournamentService.GetParticipantsDetailsAsync(id);
+            if (details.Any())
+            {
+                response.Participants = details;
+                response.ParticipantCount = details.Count(p => p.Status == "Confirmed");
+            }
+            
+            return Ok(response);
         }
 
         [HttpDelete("{id}")]
@@ -148,7 +220,8 @@ namespace GFlow.Api.Controllers
         [Authorize]
         public async Task<ActionResult> Withdraw(string id, string userId)
         {
-            var success = await _tournamentService.WithdrawParticipantAsync(id, userId);
+            var currentUser = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            var success = await _tournamentService.WithdrawParticipantAsync(id, userId, currentUser);
             if (!success)
             {
                 return NotFound("Tournament or participant not found.");
@@ -167,19 +240,29 @@ namespace GFlow.Api.Controllers
         [Authorize]
         public async Task<ActionResult> AddModerator(string id, string userId)
         {
-            // Only organizer or admin should do this. 
-            // Ideally we check permission in Service or here. 
-            // For MVP assuming Service handles business logic or we trust Authorized users if role based (not implemented yet fully).
-            // Let's rely on Service returning false if operation invalid (e.g. tournament not found).
-            // BUT Service doesn't check requesting user yet for this operation, only for submitting match result.
-            // MVP: Allow any authorized user to add moderator? No, that's unsafe.
-            // Let's add TODO or simple check if we had organizer ID in claims.
-            // Assuming current user is organizer is best effort without claim inspection here.
-            
-            var success = await _tournamentService.AddModeratorAsync(id, userId);
+            var requestingUserId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            if (requestingUserId == null) return Unauthorized();
+
+            var success = await _tournamentService.AddModeratorAsync(id, userId, requestingUserId);
             if (!success)
             {
-                return NotFound("Tournament or user not found.");
+                // Could be not found or forbidden (if not organizer)
+                return BadRequest("Could not add moderator. Check permissions (Organizer only) or user validity.");
+            }
+            return NoContent();
+        }
+
+        [HttpDelete("{id}/moderators/{userId}")]
+        [Authorize]
+        public async Task<ActionResult> RemoveModerator(string id, string userId)
+        {
+            var requestingUserId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            if (requestingUserId == null) return Unauthorized();
+
+            var success = await _tournamentService.RemoveModeratorAsync(id, userId, requestingUserId);
+            if (!success)
+            {
+                return BadRequest("Could not remove moderator. Check permissions.");
             }
             return NoContent();
         }
@@ -203,7 +286,7 @@ namespace GFlow.Api.Controllers
                 return Forbid();
             }
 
-            var success = await _tournamentService.StartNextRoundAsync(id);
+            var success = await _tournamentService.StartNextRoundAsync(id, userId);
             if (!success)
             {
                 return BadRequest("Could not start next round. Ensure previous round is finished.");
@@ -236,10 +319,29 @@ namespace GFlow.Api.Controllers
                 if (tournament.OrganizerId != userId) return Forbid();
             }
 
-            var success = await _tournamentService.AddParticipantAsync(id, request.Username);
+            var success = await _tournamentService.AddParticipantAsync(id, request.Username, userId);
             if (!success) return BadRequest("Could not add participant. User might not exist or tournament is full.");
 
             return Ok();
+        }
+
+        [HttpDelete("{id}/participants/{userId}")]
+        [Authorize]
+        public async Task<ActionResult> RemoveParticipant(string id, string userId)
+        {
+             // Permission check
+            var currentUser = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            if (currentUser == null) return Unauthorized();
+
+            var tournament = await _tournamentService.GetTournament(id);
+            if (tournament == null) return NotFound("Tournament not found.");
+            
+            if (tournament.OrganizerId != currentUser) return Forbid();
+
+            var success = await _tournamentService.RemoveParticipantAsync(id, userId, currentUser);
+            if (!success) return NotFound("Could not remove participant.");
+
+            return NoContent();
         }
 
         [HttpPost("matches/{matchId}/result")]
@@ -299,8 +401,73 @@ namespace GFlow.Api.Controllers
                 { 
                     Id = p.Id, 
                     Username = p.Username 
-                }).ToList() ?? new List<ParticipantDto>()
+                }).ToList() ?? new List<ParticipantDto>(),
+                
+                // Scoring
+                WinPoints = t.WinPoints,
+                DrawPoints = t.DrawPoints,
+                LossPoints = t.LossPoints,
+                RegistrationMode = t.RegistrationMode.ToString(),
+                EnableMatchEvents = t.EnableMatchEvents
             };
+        }
+
+        [HttpGet("{id}/audit")]
+        [Authorize]
+        public async Task<ActionResult> GetAuditLogs(string id)
+        {
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            if (userId == null) return Unauthorized();
+
+            var tournament = await _tournamentService.GetTournament(id);
+            if (tournament == null) return NotFound("Tournament not found.");
+
+            // Only Organizer or Moderator can view audit logs
+            bool isOrganizer = tournament.OrganizerId == userId;
+            bool isModerator = tournament.Moderators?.Any(u => u.Id == userId) ?? false;
+
+            if (!isOrganizer && !isModerator)
+            {
+                return Forbid();
+            }
+
+            // Get both match result audits and general tournament audits
+            var matchAudits = await _tournamentService.GetAuditLogsAsync(id);
+            var tournamentAudits = await _tournamentService.GetTournamentAuditLogsAsync(id);
+            
+            // Map match audits
+            var matchAuditDtos = matchAudits.Select(a => new AuditLogDto
+            {
+                Id = a.Id,
+                MatchId = a.MatchId,
+                OldScoreA = a.OldScoreA,
+                OldScoreB = a.OldScoreB,
+                NewScoreA = a.NewScoreA,
+                NewScoreB = a.NewScoreB,
+                ModifiedBy = a.ModifiedByDefaultId,
+                ModifiedAt = a.ModifiedAt,
+                ChangeType = a.ChangeType
+            }).ToList();
+            
+            // Map tournament audits
+            var tournamentAuditDtos = tournamentAudits.Select(a => new TournamentAuditLogDto
+            {
+                Id = a.Id,
+                TournamentId = a.TournamentId,
+                ActionType = a.ActionType,
+                TargetUserId = a.TargetUserId,
+                TargetUsername = a.TargetUsername,
+                PerformedById = a.PerformedById,
+                PerformedByUsername = a.PerformedByUsername,
+                Details = a.Details,
+                Timestamp = a.Timestamp
+            }).ToList();
+
+            return Ok(new 
+            { 
+                MatchAudits = matchAuditDtos, 
+                TournamentAudits = tournamentAuditDtos 
+            });
         }
 
 

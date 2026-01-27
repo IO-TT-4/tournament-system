@@ -205,7 +205,7 @@ function Home() {
       <div className="container">
         <section className="hero-section">
           <h1>{t('title')}</h1>
-          <p className="hero-description">{t('description')}</p>
+          <p className="hero-description">{t('appDescription')}</p>
         </section>
       </div>
     </main>

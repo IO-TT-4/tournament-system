@@ -6,7 +6,7 @@ import '../assets/styles/auth.css';
 
 function Register() {
   const { registerUser } = useAuth();
-  const { t } = useTranslation('login');
+  const { t } = useTranslation('mainPage');
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -16,7 +16,7 @@ function Register() {
     e.preventDefault();
     
     if (password !== confirmPassword) {
-      alert(t('passwordsMismatch'));
+      alert(t('auth.passwordsMismatch'));
       return;
     }
     
@@ -28,16 +28,16 @@ function Register() {
       <div className="auth-background" />
       
       <div className="auth-card">
-        <h1>{t('titleRegister')}</h1>
-        <p>{t('joinUs')}</p>
+        <h1>{t('auth.register.title')}</h1>
+        <p>{t('auth.joinUs')}</p>
 
         <form className="auth-form" onSubmit={handleSubmit}>
           <div className="form-group">
-            <label htmlFor="username">{t('login')}</label>
+            <label htmlFor="username">{t('auth.username')}</label>
             <input
               type="text"
               id="username"
-              placeholder={t('usernamePlaceholder')}
+              placeholder={t('auth.usernamePlaceholder')}
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               required
@@ -45,11 +45,11 @@ function Register() {
           </div>
 
           <div className="form-group">
-            <label htmlFor="email">{t('email')}</label>
+            <label htmlFor="email">{t('auth.email')}</label>
             <input
               type="email"
               id="email"
-              placeholder={t('emailPlaceholder')}
+              placeholder={t('auth.emailPlaceholder')}
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
@@ -57,7 +57,7 @@ function Register() {
           </div>
 
           <div className="form-group">
-            <label htmlFor="password">{t('password')}</label>
+            <label htmlFor="password">{t('auth.password')}</label>
             <input
               type="password"
               id="password"
@@ -70,7 +70,7 @@ function Register() {
           </div>
 
           <div className="form-group">
-            <label htmlFor="confirmPassword">{t('retype')} {t('password')}</label>
+            <label htmlFor="confirmPassword">{t('auth.retype')} {t('auth.password')}</label>
             <input
               type="password"
               id="confirmPassword"
@@ -83,13 +83,13 @@ function Register() {
           </div>
 
           <button type="submit" className="auth-submit-btn">
-            {t('buttonRegister')}
+            {t('auth.register.button')}
           </button>
         </form>
 
         <div className="auth-footer">
-          {t('hasAccount')}{' '}
-          <Link to="/login">{t('buttonLogin')}</Link>
+          {t('auth.hasAccount')}{' '}
+          <Link to="/login">{t('auth.login.button')}</Link>
         </div>
       </div>
     </div>

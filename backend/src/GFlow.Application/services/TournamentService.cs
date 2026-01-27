@@ -63,6 +63,7 @@ namespace GFlow.Application.Services
                 EndDate = DateTime.SpecifyKind(request.EndDate, DateTimeKind.Utc),
                 Description = request.Description,
                 NumberOfRounds = request.NumberOfRounds,
+                RegistrationMode = request.RegistrationMode,
                 
                 // New Fields Mapping
                 CountryCode = request.CountryCode,
@@ -71,7 +72,13 @@ namespace GFlow.Application.Services
                 GameCode = request.GameCode,
                 GameName = request.GameName,
                 Emblem = request.Emblem,
-                TieBreakers = request.TieBreakers ?? new List<string>()
+                TieBreakers = request.TieBreakers ?? new List<string>(),
+                
+                // Scoring
+                WinPoints = request.WinPoints,
+                DrawPoints = request.DrawPoints,
+                LossPoints = request.LossPoints,
+                EnableMatchEvents = request.EnableMatchEvents
             };
 
             // Geocoding Logic
@@ -154,6 +161,21 @@ namespace GFlow.Application.Services
                 tournament.Emblem = request.Emblem;
             }
 
+            if (!string.IsNullOrEmpty(request.Description))
+            {
+                tournament.Description = request.Description;
+            }
+
+            // Allow updating scoring rules
+            if (request.WinPoints.HasValue) tournament.WinPoints = request.WinPoints;
+            if (request.DrawPoints.HasValue) tournament.DrawPoints = request.DrawPoints;
+            if (request.WinPoints.HasValue) tournament.WinPoints = request.WinPoints;
+            if (request.DrawPoints.HasValue) tournament.DrawPoints = request.DrawPoints;
+            if (request.LossPoints.HasValue) tournament.LossPoints = request.LossPoints;
+            
+            if (request.RegistrationMode.HasValue) tournament.RegistrationMode = request.RegistrationMode.Value;
+            if (request.EnableMatchEvents.HasValue) tournament.EnableMatchEvents = request.EnableMatchEvents.Value;
+
             return await _tournamentRepo.Update(tournament);
         }
 
@@ -162,19 +184,69 @@ namespace GFlow.Application.Services
             return await _tournamentRepo.Delete(id);
         }
 
-        public async Task<bool> WithdrawParticipantAsync(string tournamentId, string userId)
-        {
-            var participant = await _tournamentRepo.GetParticipant(tournamentId, userId);
-            if (participant == null) return false;
-
-            participant.IsWithdrawn = true;
-            return await _tournamentRepo.UpdateParticipant(participant);
-        }
-
-        public async Task<bool> AddModeratorAsync(string tournamentId, string userId)
+        public async Task<bool> WithdrawParticipantAsync(string tournamentId, string userId, string? performedById = null)
         {
             var tournament = await _tournamentRepo.GetTournament(tournamentId);
             if (tournament == null) return false;
+
+            var user = await _userRepo.Get(userId);
+            var performer = performedById != null ? await _userRepo.Get(performedById) : null;
+
+            // If tournament hasn't started, remove the participant completely
+            if (tournament.Status == Domain.ValueObjects.TournamentStatus.CREATED)
+            {
+                var result = await RemoveParticipantAsync(tournamentId, userId, performedById);
+                
+                // Audit: ParticipantWithdrawn (pre-tournament)
+                if (result && performedById != null)
+                {
+                    await _tournamentRepo.AddTournamentAuditAsync(new TournamentAuditLog
+                    {
+                        TournamentId = tournamentId,
+                        ActionType = "ParticipantWithdrawn",
+                        TargetUserId = userId,
+                        TargetUsername = user?.Username,
+                        PerformedById = performedById,
+                        PerformedByUsername = performer?.Username
+                    });
+                }
+                return result;
+            }
+
+            // If started, mark as withdrawn
+            var participant = await _tournamentRepo.GetParticipant(tournamentId, userId);
+            if (participant == null) return false;
+
+            participant.Status = ParticipantStatus.Withdrawn;
+            var updated = await _tournamentRepo.UpdateParticipant(participant);
+            
+            // Audit: ParticipantMarkedWithdrawn (mid-tournament)
+            if (updated && performedById != null)
+            {
+                await _tournamentRepo.AddTournamentAuditAsync(new TournamentAuditLog
+                {
+                    TournamentId = tournamentId,
+                    ActionType = "ParticipantMarkedWithdrawn",
+                    TargetUserId = userId,
+                    TargetUsername = user?.Username,
+                    PerformedById = performedById,
+                    PerformedByUsername = performer?.Username
+                });
+            }
+            
+            return updated;
+        }
+
+        public async Task<bool> AddModeratorAsync(string tournamentId, string userId, string? requestingUserId = null)
+        {
+            var tournament = await _tournamentRepo.GetTournament(tournamentId);
+            if (tournament == null) return false;
+
+            // Permission Check: Only Organizer can add moderators
+            if (requestingUserId != null && tournament.OrganizerId != requestingUserId)
+            {
+                return false;
+            }
 
             var user = await _userRepo.Get(userId);
             if (user == null) return false;
@@ -185,6 +257,24 @@ namespace GFlow.Application.Services
             }
 
             tournament.Moderators.Add(user);
+            return await _tournamentRepo.Update(tournament) != null;
+        }
+
+        public async Task<bool> RemoveModeratorAsync(string tournamentId, string userId, string? requestingUserId = null)
+        {
+            var tournament = await _tournamentRepo.GetTournament(tournamentId);
+            if (tournament == null) return false;
+
+            // Permission Check: Only Organizer can remove moderators
+            if (requestingUserId != null && tournament.OrganizerId != requestingUserId)
+            {
+                return false;
+            }
+
+            var existing = tournament.Moderators.FirstOrDefault(m => m.Id == userId);
+            if (existing == null) return true; // Already removed
+
+            tournament.Moderators.Remove(existing);
             return await _tournamentRepo.Update(tournament) != null;
         }
 
@@ -255,7 +345,6 @@ namespace GFlow.Application.Services
         }
 
         public async Task<bool> SubmitMatchResultAsync(string matchId, double scoreA, double scoreB, string? requestingUserId = null, string finishType = "Normal")
-
         {
             var match = await _tournamentRepo.GetMatchById(matchId);
             if (match == null) return false;
@@ -275,16 +364,21 @@ namespace GFlow.Application.Services
                 }
             }
 
+            // Capture Pre-Update State for Audit
+            double? oldScoreA = match.ScoreA;
+            double? oldScoreB = match.ScoreB;
+            bool wasCompleted = match.IsCompleted;
+
             if (match.IsCompleted) 
             {
-                // Optionally allow overwriting
+                // Optionally allow overwriting (Already allowed by logic flow)
             }
 
             if (finishType == "Walkover")
             {
                 if (scoreA > scoreB) match.SetWalkover(match.PlayerHomeId);
                 else if (scoreB > scoreA && match.PlayerAwayId != null) match.SetWalkover(match.PlayerAwayId);
-                else match.FinishMatch(scoreA, scoreB); // Fallback?
+                else match.FinishMatch(scoreA, scoreB); // Fallback
             }
             else
             {
@@ -292,6 +386,24 @@ namespace GFlow.Application.Services
             }
             
             await _tournamentRepo.UpdateMatch(match);
+            
+            // Audit Logging
+            if (requestingUserId != null)
+            {
+                var audit = new MatchResultAudit
+                {
+                    MatchId = matchId,
+                    TournamentId = match.TournamentId,
+                    OldScoreA = oldScoreA,
+                    OldScoreB = oldScoreB,
+                    NewScoreA = match.ScoreA ?? 0,
+                    NewScoreB = match.ScoreB ?? 0,
+                    ModifiedByDefaultId = requestingUserId,
+                    ChangeType = wasCompleted ? "Update" : "Submission",
+                    ModifiedAt = DateTime.UtcNow
+                };
+                await _tournamentRepo.AddMatchResultAudit(audit);
+            }
             
             return true;
         }
@@ -351,14 +463,14 @@ namespace GFlow.Application.Services
             {
                 if (stats.TryGetValue(match.PlayerHomeId, out var p1))
                 {
-                    UpdateStats(p1, match.Result!.ScoreA, match.Result.ScoreB);
+                    UpdateStats(p1, match.Result!.ScoreA, match.Result.ScoreB, tournament);
                     p1.MatchesPlayed++;
                     matchHistory[match.PlayerHomeId].Add((match.PlayerAwayId, match.Result.ScoreA, match.RoundNumber));
                 }
 
                 if (match.PlayerAwayId != null && stats.TryGetValue(match.PlayerAwayId, out var p2))
                 {
-                    UpdateStats(p2, match.Result!.ScoreB, match.Result.ScoreA);
+                    UpdateStats(p2, match.Result!.ScoreB, match.Result.ScoreA, tournament);
                     p2.MatchesPlayed++;
                     matchHistory[match.PlayerAwayId].Add((match.PlayerHomeId, match.Result.ScoreB, match.RoundNumber));
                 }
@@ -422,15 +534,35 @@ namespace GFlow.Application.Services
             return ordered.ToList();
         }
 
-        private void UpdateStats(DTOs.StandingsEntry entry, double myScore, double opponentScore)
+        private void UpdateStats(DTOs.StandingsEntry entry, double myScore, double opponentScore, Tournament tournament)
         {
-            entry.Score += myScore;
+            // If custom scoring rules are defined, use them.
+            // Otherwise, sum the raw score.
+            if (tournament.WinPoints.HasValue) 
+            {
+                // We assume if WinPoints is set, the others are set or default to 0. 
+                // But safer to check all or use coalesce.
+                double winP = tournament.WinPoints ?? 0;
+                double drawP = tournament.DrawPoints ?? 0;
+                double lossP = tournament.LossPoints ?? 0;
+
+                if (myScore > opponentScore) entry.Score += winP;
+                else if (myScore < opponentScore) entry.Score += lossP;
+                else entry.Score += drawP;
+            }
+            else
+            {
+                // Default behavior: Sum raw score (e.g. goals, chess points in standard notation)
+                entry.Score += myScore;
+            }
+
+            // Update W/D/L counters based on raw result
             if (myScore > opponentScore) entry.Wins++;
             else if (myScore < opponentScore) entry.Losses++;
             else entry.Draws++;
         }
 
-        public async Task<bool> StartNextRoundAsync(string tournamentId)
+        public async Task<bool> StartNextRoundAsync(string tournamentId, string? performedById = null)
         {
             var tournament = await _tournamentRepo.GetTournament(tournamentId);
             if (tournament == null) 
@@ -452,7 +584,7 @@ namespace GFlow.Application.Services
                         var newTp = new TournamentParticipant(user.Id, 1000)
                         {
                             TournamentId = tournamentId,
-                            IsWithdrawn = false
+                            Status = ParticipantStatus.Confirmed
                         };
                         await _tournamentRepo.AddParticipant(newTp);
                         participants.Add(newTp); // Add to local list for immediate use
@@ -501,6 +633,12 @@ namespace GFlow.Application.Services
                 case TournamentSystemType.DOUBLE_ELIMINATION:
                     strategy = new GFlow.Domain.Services.Pairings.DoubleEliminationStrategy();
                     break;
+                case TournamentSystemType.SINGLE_ROUND_ROBIN:
+                    strategy = new GFlow.Domain.Services.Pairings.SingleRoundRobinStrategy();
+                    break;
+                case TournamentSystemType.DOUBLE_ROUND_ROBIN:
+                    strategy = new GFlow.Domain.Services.Pairings.DoubleRoundRobinStrategy();
+                    break;
                 default:
                     // Fallback to Swiss or Throw
                     strategy = new GFlow.Domain.Services.Pairings.SwissPairingStrategy(tournament.NumberOfRounds ?? 5);
@@ -511,11 +649,27 @@ namespace GFlow.Application.Services
             {
                 var newMatches = strategy.GenerateNextRound(tournament, participants, matches);
                 
+                int newRoundNumber = newMatches.Any() ? newMatches.First().RoundNumber : 0;
+                
                 // Use bulk save
                 if (newMatches.Any())
                 {
                     await _tournamentRepo.SaveMatches(newMatches);
                     Console.WriteLine($"Generated and saved {newMatches.Count()} matches for round.");
+                    
+                    // Audit: RoundPaired
+                    if (performedById != null)
+                    {
+                        var performer = await _userRepo.Get(performedById);
+                        await _tournamentRepo.AddTournamentAuditAsync(new TournamentAuditLog
+                        {
+                            TournamentId = tournamentId,
+                            ActionType = "RoundPaired",
+                            PerformedById = performedById,
+                            PerformedByUsername = performer?.Username,
+                            Details = $"Round {newRoundNumber} created with {newMatches.Count()} matches"
+                        });
+                    }
                 }
                 else 
                 {
@@ -590,7 +744,7 @@ namespace GFlow.Application.Services
             return dtos.OrderByDescending(m => m.RoundNumber).ThenBy(m => m.TableNumber).ToList();
         }
 
-        public async Task<bool> AddParticipantAsync(string tournamentId, string username)
+        public async Task<bool> AddParticipantAsync(string tournamentId, string username, string? performedById = null)
         {
             var tournament = await _tournamentRepo.GetTournament(tournamentId);
             if (tournament == null) return false;
@@ -613,12 +767,305 @@ namespace GFlow.Application.Services
                 var tp = new TournamentParticipant(user.Id, 1000) 
                 { 
                     TournamentId = tournamentId,
-                    IsWithdrawn = false
+                    Status = ParticipantStatus.Confirmed
                 };
                 await _tournamentRepo.AddParticipant(tp);
             }
 
+            // Audit: ParticipantAdded
+            if (performedById != null)
+            {
+                var performer = await _userRepo.Get(performedById);
+                await _tournamentRepo.AddTournamentAuditAsync(new TournamentAuditLog
+                {
+                    TournamentId = tournamentId,
+                    ActionType = "ParticipantAdded",
+                    TargetUserId = user.Id,
+                    TargetUsername = user.Username,
+                    PerformedById = performedById,
+                    PerformedByUsername = performer?.Username
+                });
+            }
+
             return true;
+        }
+
+        public async Task<bool> RemoveParticipantAsync(string tournamentId, string userId, string? performedById = null)
+        {
+            var tournament = await _tournamentRepo.GetTournament(tournamentId);
+            if (tournament == null) return false;
+
+            // Remove from main participants list
+            var user = tournament.Participants.FirstOrDefault(u => u.Id == userId);
+            string? removedUsername = user?.Username;
+            bool removedFromTournament = false;
+            if (user != null)
+            {
+                tournament.Participants.Remove(user);
+                await _tournamentRepo.Update(tournament);
+                removedFromTournament = true;
+            }
+
+            // Remove TournamentParticipant entity
+            var existingTp = await _tournamentRepo.GetParticipant(tournamentId, userId);
+            bool removedFromTp = false;
+            if (existingTp != null)
+            {
+                 removedFromTp = await _tournamentRepo.DeleteParticipant(tournamentId, userId);
+            }
+            
+            // Audit: ParticipantRemoved
+            if ((removedFromTournament || removedFromTp) && performedById != null)
+            {
+                var performer = await _userRepo.Get(performedById);
+                await _tournamentRepo.AddTournamentAuditAsync(new TournamentAuditLog
+                {
+                    TournamentId = tournamentId,
+                    ActionType = "ParticipantRemoved",
+                    TargetUserId = userId,
+                    TargetUsername = removedUsername,
+                    PerformedById = performedById,
+                    PerformedByUsername = performer?.Username
+                });
+            }
+            
+            return removedFromTournament || removedFromTp;
+        }
+
+        public async Task<string> JoinTournamentAsync(string tournamentId, string userId)
+        {
+            var tournament = await _tournamentRepo.GetTournament(tournamentId);
+            if (tournament == null) return "NotFound";
+
+            var existing = await _tournamentRepo.GetParticipant(tournamentId, userId);
+            
+            // Check if active
+            if (existing != null && 
+                existing.Status != ParticipantStatus.Withdrawn && 
+                existing.Status != ParticipantStatus.Rejected)
+            {
+                return "AlreadyJoined";
+            }
+
+            // Count CONFIRMED players
+            var participants = await _tournamentRepo.GetParticipants(tournamentId);
+            int confirmedCount = participants.Count(p => p.Status == ParticipantStatus.Confirmed);
+
+            var targetStatus = ParticipantStatus.Confirmed;
+            string resultMsg = "Joined";
+
+            if (tournament.RegistrationMode == RegistrationMode.ApprovalRequired)
+            {
+                targetStatus = ParticipantStatus.PendingApproval;
+                resultMsg = "Pending";
+            }
+            else if (confirmedCount >= tournament.PlayerLimit)
+            {
+                targetStatus = ParticipantStatus.Waitlist;
+                resultMsg = "Waitlist";
+            }
+            
+            if (existing != null)
+            {
+                existing.Status = targetStatus;
+                await _tournamentRepo.UpdateParticipant(existing);
+            }
+            else 
+            {
+                var tp = new TournamentParticipant(userId, 1000) 
+                { 
+                     TournamentId = tournamentId,
+                     Status = targetStatus
+                };
+                await _tournamentRepo.AddParticipant(tp);
+            }
+            
+            // Sync to Tournament.Participants if Confirmed
+            if (targetStatus == ParticipantStatus.Confirmed)
+            {
+                 var user = await _userRepo.Get(userId);
+                 if (user != null && !tournament.Participants.Any(u => u.Id == userId))
+                 {
+                     tournament.Participants.Add(user);
+                     await _tournamentRepo.Update(tournament);
+                 }
+            }
+            
+            // Audit: RegistrationRequest
+            var requestingUser = await _userRepo.Get(userId);
+            await _tournamentRepo.AddTournamentAuditAsync(new TournamentAuditLog
+            {
+                TournamentId = tournamentId,
+                ActionType = "RegistrationRequest",
+                TargetUserId = userId,
+                TargetUsername = requestingUser?.Username,
+                PerformedById = userId,
+                PerformedByUsername = requestingUser?.Username,
+                Details = $"Status: {resultMsg}"
+            });
+            
+            return resultMsg;
+        }
+
+        public async Task<bool> ProcessJoinRequestAsync(string tournamentId, string userId, bool isApproved, string? performedById = null)
+        {
+            var tournament = await _tournamentRepo.GetTournament(tournamentId);
+            if (tournament == null) return false;
+
+            var participant = await _tournamentRepo.GetParticipant(tournamentId, userId);
+            if (participant == null) return false; // Must request first
+
+            var targetUser = await _userRepo.Get(userId);
+            var performer = performedById != null ? await _userRepo.Get(performedById) : null;
+
+            if (isApproved)
+            {
+                // Check limits again?
+                var participants = await _tournamentRepo.GetParticipants(tournamentId);
+                int confirmedCount = participants.Count(p => p.Status == ParticipantStatus.Confirmed);
+                
+                if (confirmedCount >= tournament.PlayerLimit)
+                {
+                    // Full. Can't approve. Maybe move to waitlist?
+                    // For now, return false or error? 
+                    // Let's force move to Waitlist if full, or fail.
+                    participant.Status = ParticipantStatus.Waitlist;
+                    await _tournamentRepo.UpdateParticipant(participant);
+                    return false; // Indicating "Full"
+                }
+
+                participant.Status = ParticipantStatus.Confirmed;
+                await _tournamentRepo.UpdateParticipant(participant);
+
+                // Sync
+                var user = await _userRepo.Get(userId);
+                if (user != null && !tournament.Participants.Any(u => u.Id == userId))
+                {
+                    tournament.Participants.Add(user);
+                    await _tournamentRepo.Update(tournament);
+                }
+                
+                // Audit: RegistrationApproved
+                if (performedById != null)
+                {
+                    await _tournamentRepo.AddTournamentAuditAsync(new TournamentAuditLog
+                    {
+                        TournamentId = tournamentId,
+                        ActionType = "RegistrationApproved",
+                        TargetUserId = userId,
+                        TargetUsername = targetUser?.Username,
+                        PerformedById = performedById,
+                        PerformedByUsername = performer?.Username
+                    });
+                }
+            }
+            else
+            {
+                participant.Status = ParticipantStatus.Rejected;
+                await _tournamentRepo.UpdateParticipant(participant);
+                
+                // Ensure removed from main list if somehow there
+                if (tournament.Participants.Any(u => u.Id == userId))
+                {
+                    var u = tournament.Participants.FirstOrDefault(user => user.Id == userId);
+                    if (u != null) 
+                    {
+                        tournament.Participants.Remove(u);
+                        await _tournamentRepo.Update(tournament);
+                    }
+                }
+                
+                // Audit: RegistrationRejected
+                if (performedById != null)
+                {
+                    await _tournamentRepo.AddTournamentAuditAsync(new TournamentAuditLog
+                    {
+                        TournamentId = tournamentId,
+                        ActionType = "RegistrationRejected",
+                        TargetUserId = userId,
+                        TargetUsername = targetUser?.Username,
+                        PerformedById = performedById,
+                        PerformedByUsername = performer?.Username
+                    });
+                }
+            }
+
+            return true;
+        }
+
+        public async Task<List<ParticipantDto>> GetParticipantsDetailsAsync(string tournamentId)
+        {
+            var participants = await _tournamentRepo.GetParticipants(tournamentId);
+            if (!participants.Any()) return new List<ParticipantDto>();
+
+            var userIds = participants.Select(p => p.UserId).Distinct().ToList();
+            var users = await _userRepo.GetUsers(userIds);
+            var userMap = users.ToDictionary(u => u.Id);
+
+            var dtos = new List<ParticipantDto>();
+            foreach(var p in participants)
+            {
+                var username = "Unknown";
+                if (userMap.TryGetValue(p.UserId, out var u)) username = u.Username;
+
+                dtos.Add(new ParticipantDto
+                {
+                    Id = p.UserId,
+                    Username = username,
+                    Status = p.Status.ToString(),
+                    IsWithdrawn = p.Status == ParticipantStatus.Withdrawn
+                });
+            }
+            return dtos;
+        }
+
+        public async Task<MatchDetailsDto?> GetMatchDetailsAsync(string matchId)
+        {
+            var match = await _tournamentRepo.GetMatchById(matchId);
+            if (match == null) return null;
+
+            var tournament = await _tournamentRepo.GetTournament(match.TournamentId);
+            if (tournament == null) return null;
+
+            var homeUser = tournament.Participants.FirstOrDefault(u => u.Id == match.PlayerHomeId);
+            var awayUser = tournament.Participants.FirstOrDefault(u => u.Id == match.PlayerAwayId);
+
+            return new MatchDetailsDto
+            {
+                Id = match.Id,
+                TournamentId = match.TournamentId,
+                RoundNumber = match.RoundNumber,
+                TableNumber = match.PositionInRound ?? 0,
+                PlayerHomeId = match.PlayerHomeId,
+                PlayerAwayId = match.PlayerAwayId,
+                PlayerHomeName = homeUser?.Username ?? "Unknown",
+                PlayerAwayName = awayUser?.Username ?? "Unknown",
+                ScoreA = match.ScoreA ?? 0,
+                ScoreB = match.ScoreB ?? 0,
+                IsCompleted = match.IsCompleted,
+                EnableMatchEvents = tournament.EnableMatchEvents,
+                Result = match.Result != null ? new MatchResultDto 
+                { 
+                    ScoreA = match.Result.ScoreA, 
+                    ScoreB = match.Result.ScoreB, 
+                    FinishType = match.Result.FinishType.ToString() 
+                } : null
+            };
+        }
+
+        public async Task<List<MatchResultAudit>> GetAuditLogsAsync(string tournamentId)
+        {
+            return await _tournamentRepo.GetMatchResultAudits(tournamentId);
+        }
+
+        public async Task<List<TournamentAuditLog>> GetTournamentAuditLogsAsync(string tournamentId)
+        {
+            return await _tournamentRepo.GetTournamentAuditsAsync(tournamentId);
+        }
+
+        public async Task<List<Tournament>> GetTournamentsByUserAsync(string userId)
+        {
+             return await _tournamentRepo.GetTournamentsByUserId(userId);
         }
     }
 }

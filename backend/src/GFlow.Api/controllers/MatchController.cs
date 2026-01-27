@@ -20,6 +20,17 @@ namespace GFlow.Api.Controllers
             _eventService = eventService;
         }
 
+        [HttpGet("{id}")]
+        public async Task<ActionResult<MatchDetailsDto>> GetMatch(string id)
+        {
+            var match = await _tournamentService.GetMatchDetailsAsync(id);
+            if (match == null)
+            {
+                return NotFound($"Match with ID {id} not found.");
+            }
+            return Ok(match);
+        }
+
         [HttpPost("{id}/result")]
         [Authorize]
         public async Task<ActionResult> SubmitResult(string id, [FromBody] SubmitMatchResultRequest request)

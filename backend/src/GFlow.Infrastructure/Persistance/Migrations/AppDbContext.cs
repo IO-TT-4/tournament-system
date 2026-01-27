@@ -15,6 +15,8 @@ namespace GFlow.Infrastructure.Persistance
         public DbSet<TournamentParticipant> TournamentParticipants => Set<TournamentParticipant>();
         
         public DbSet<MatchEvent> MatchEvents => Set<MatchEvent>();
+        public DbSet<MatchResultAudit> MatchResultAudits => Set<MatchResultAudit>();
+        public DbSet<TournamentAuditLog> TournamentAuditLogs => Set<TournamentAuditLog>();
         public DbSet<UserActivity> UserActivities => Set<UserActivity>();
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -44,8 +46,8 @@ namespace GFlow.Infrastructure.Persistance
                  .WithMany()
                  .UsingEntity(j => j.ToTable("TournamentModerators"));
 
-            // Npgsql supports List<string> -> text[] natively, no conversion needed.
-            // Converting to JSON broke the read because column is already text[].
+                // .Property(t => t.TieBreakers) // Npgsql handles List<string> -> text[] natively.
+                // .HasConversion(...) removed because DB column is text[], not text/json.
 
             // W AppDbContext.cs
             
@@ -58,6 +60,7 @@ namespace GFlow.Infrastructure.Persistance
                 entity.Ignore(tp => tp.RoleHistory);
                 entity.Ignore(tp => tp.OpponentScoreHistory);
                 entity.Ignore(tp => tp.UnavailableRounds);
+                entity.Ignore(tp => tp.IsWithdrawn); // Computed helper
             });
 
             // 3. Konfiguracja Match
@@ -105,6 +108,22 @@ namespace GFlow.Infrastructure.Persistance
                 entity.HasOne<User>()
                     .WithMany()
                     .HasForeignKey(e => e.RecordedBy)
+                    .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            // 6. Konfiguracja MatchResultAudit
+            modelBuilder.Entity<MatchResultAudit>(entity =>
+            {
+                entity.HasKey(a => a.Id);
+                
+                entity.HasOne<Match>()
+                    .WithMany()
+                    .HasForeignKey(a => a.MatchId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne<User>()
+                    .WithMany()
+                    .HasForeignKey(a => a.ModifiedByDefaultId)
                     .OnDelete(DeleteBehavior.Restrict);
             });
 

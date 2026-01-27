@@ -58,5 +58,11 @@ namespace GFlow.Infrastructure.Persistance.Repositories
                 .Take(10) // Limit results
                 .ToListAsync();
         }
+
+        public async Task<List<User>> GetUsers(List<string> ids)
+        {
+            if (ids == null || !ids.Any()) return new List<User>();
+            return await _context.Users.Where(u => ids.Contains(u.Id)).ToListAsync();
+        }
     }
 }

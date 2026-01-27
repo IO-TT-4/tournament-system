@@ -98,12 +98,8 @@ namespace GFlow.Domain.Services.Pairings
 
     private string GetWinnerId(Match match)
     {
-        if (match.Result == null) return null!; // Should handle this better, but using null! to satisfy logic flow or check
-        // Actually if match.Result.ScoreA > B, returns HomeId.
-        // If BYE, ScoreA=1, ScoreB=0 -> HomeId. Correct.
-        return match.Result.ScoreA > match.Result.ScoreB ? match.PlayerHomeId : (match.PlayerAwayId ?? match.PlayerHomeId); 
-        // Logic: if AwayId is null (BYE), Home wins always. 
-        // Existing logic: scoreA > scoreB -> Home. ScoreA=1. Correct.
+        if (match.Result == null) return null!; 
+        return match.Result.ScoreA > match.Result.ScoreB ? match.PlayerHomeId : (match.PlayerAwayId ?? match.PlayerHomeId);
     }
     }
 }

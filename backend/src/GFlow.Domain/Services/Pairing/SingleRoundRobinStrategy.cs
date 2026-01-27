@@ -46,8 +46,8 @@ namespace GFlow.Domain.Services.Pairings
                 {
                     // Alternating Home/Away role assignment for balance
                     var match = (round + i) % 2 == 0 
-                        ? new Match(tournamentId, home.UserId, away.UserId, round, tournamentId)
-                        : new Match(tournamentId, away.UserId, home.UserId, round, tournamentId);
+                        ? new Match(Guid.NewGuid().ToString(), home.UserId, away.UserId, round, tournamentId)
+                        : new Match(Guid.NewGuid().ToString(), away.UserId, home.UserId, round, tournamentId);
                     
                     allMatches.Add(match);
                 }
@@ -55,7 +55,7 @@ namespace GFlow.Domain.Services.Pairings
                 {
                     // Optional: You can save the BYE match in the database with a ready result
                     var byePlayerId = home.UserId == Guid.Empty.ToString() ? away.UserId : home.UserId;
-                    var byeMatch = new Match(tournamentId, byePlayerId, Guid.Empty.ToString(), round, tournamentId);
+                    var byeMatch = new Match(Guid.NewGuid().ToString(), byePlayerId, null, round, tournamentId);
                     byeMatch.SetResult(MatchResult.CreateBye());
                     allMatches.Add(byeMatch);
                 }

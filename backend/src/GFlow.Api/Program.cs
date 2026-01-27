@@ -129,6 +129,9 @@ builder.Services.AddScoped<IUserPreferenceService, UserPreferenceService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<ITournamentService, TournamentService>();
+builder.Services.AddScoped<MatchEventService>();
+
+builder.Services.AddScoped<IMatchEventRepository, MatchEventRepositoryPostgres>();
 
 
 var app = builder.Build();

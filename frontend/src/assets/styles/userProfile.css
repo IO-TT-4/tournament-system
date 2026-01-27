@@ -1,0 +1,200 @@
+.user-profile-page {
+    padding: 40px 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+    animation: fadeIn 0.5s ease-in-out;
+    margin-top: 100px;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Profile Header Section */
+.profile-header-card {
+    background: rgba(30, 30, 40, 0.6);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    border-radius: 20px;
+    padding: 40px;
+    text-align: center;
+    margin-bottom: 50px;
+    position: relative;
+    overflow: hidden;
+}
+
+.profile-header-card::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle at center, rgba(64, 158, 255, 0.1) 0%, transparent 60%);
+    pointer-events: none;
+    z-index: 0;
+}
+
+.profile-avatar-wrapper {
+    position: relative;
+    z-index: 1;
+    width: 120px;
+    height: 120px;
+    margin: 0 auto 20px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #409eff, #3a8ee6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 3.5rem;
+    font-weight: 700;
+    color: white;
+    box-shadow: 0 10px 20px rgba(64, 158, 255, 0.3);
+    border: 4px solid rgba(255, 255, 255, 0.1);
+}
+
+.profile-username {
+    position: relative;
+    z-index: 1;
+    font-size: 2.5rem;
+    margin: 0 0 10px;
+    background: linear-gradient(to right, #ffffff, #b3c0d1);
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.profile-stats-meta {
+    position: relative;
+    z-index: 1;
+    color: #8c9cab;
+    font-size: 1.1rem;
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+}
+
+.stat-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.stat-value {
+    font-size: 1.5rem;
+    color: #409eff;
+    font-weight: bold;
+}
+
+.stat-label {
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+/* Sections */
+.profile-section-title {
+    font-size: 1.5rem;
+    margin-bottom: 25px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    color: #e0e6ed;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* Cards Grid from Tournaments can be reused or enhanced */
+.profile-tournaments-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 25px;
+}
+
+.profile-tournament-card {
+    background: rgba(40, 44, 52, 0.7);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 12px;
+    overflow: hidden;
+    transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+    text-decoration: none;
+    color: inherit;
+    display: flex;
+    flex-direction: column;
+}
+
+.profile-tournament-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.4);
+    border-color: rgba(64, 158, 255, 0.4);
+}
+
+.pt-card-header {
+    background: rgba(0, 0, 0, 0.2);
+    padding: 15px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.pt-game-badge {
+    background: rgba(64, 158, 255, 0.15);
+    color: #409eff;
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.pt-status-badge {
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+.pt-status-active { background: rgba(103, 194, 58, 0.2); color: #67c23a; }
+.pt-status-upcoming { background: rgba(230, 162, 60, 0.2); color: #e6a23c; }
+.pt-status-completed { background: rgba(144, 147, 153, 0.2); color: #909399; }
+
+.pt-card-body {
+    padding: 20px;
+    flex-grow: 1;
+}
+
+.pt-card-title {
+    font-size: 1.2rem;
+    margin: 0 0 15px;
+    color: #ffffff;
+    line-height: 1.4;
+}
+
+.pt-card-details {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    font-size: 0.9rem;
+    color: #a0aec0;
+}
+
+.pt-detail-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.pt-icon {
+    opacity: 0.7;
+}
+
+.no-data-msg {
+    text-align: center;
+    padding: 40px;
+    color: #666;
+    background: rgba(0,0,0,0.1);
+    border-radius: 12px;
+}

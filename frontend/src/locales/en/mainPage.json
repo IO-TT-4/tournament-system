@@ -1,6 +1,6 @@
 {
   "title": "Tournament System",
-  "description": "A universal platform for creating and tracking various types of tournaments, e.g., e-sports/board games. The system must allow participants (both individual and team) to be added and then automatically generate tournament brackets in various systems. The visualization of brackets and the updating and presentation of results will be key. It stores historical data.",
+  "appDescription": "A universal platform for creating and tracking various types of tournaments, e.g., e-sports/board games. The system must allow participants (both individual and team) to be added and then automatically generate tournament brackets in various systems. The visualization of brackets and the updating and presentation of results will be key. It stores historical data.",
   "currentTournaments": "Active tournaments",
   "futureTournaments": "Upcoming tournaments",
   "allTournaments": "All Tournaments",
@@ -11,7 +11,42 @@
   "createTournament": "Create Tournament",
   "tournamentName": "Tournament Name",
   "game": "Game",
-  "emblem": "Emblem",
+  "menu": {
+      "logoAlt": "Tournament System",
+      "tournaments": "Tournaments",
+      "createTournament": "Create Tournament",
+      "authorized": {
+          "logout": "Logout"
+      },
+      "guest": {
+          "login": "Login"
+      }
+  },
+  "auth": {
+      "register": {
+          "title": "Create Account",
+          "button": "Register"
+      },
+      "login": {
+          "title": "Login",
+          "button": "Login",
+          "welcome": "Welcome back!",
+          "noAccount": "Don't have an account?"
+      },
+      "joinUs": "Join us today!",
+      "username": "Username",
+      "usernamePlaceholder": "Enter username",
+      "email": "Email",
+      "emailPlaceholder": "Enter email",
+      "password": "Password",
+      "retype": "Retype",
+      "passwordsMismatch": "Passwords do not match!",
+      "hasAccount": "Already have an account?",
+      "registerSuccess": "Registration successful!",
+      "loginSuccess": "Login successful!",
+      "logoutSuccess": "Logged out successfully"
+  },
+
   "onlineTournament": "Online Tournament",
   "address": "Address",
   "moderators": "Moderators (User IDs)",
@@ -40,7 +75,7 @@
   "loadMore": "Load more",
   "filterByGame": "Discipline",
   "all": "All",
-  "status": "Status",
+
   "sortBy": "Sort by",
   "dateAsc": "Date: Ascending",
   "dateDesc": "Date: Descending",
@@ -86,7 +121,7 @@
   "noParticipants": "No participants yet.",
   "organizer": "Organizer",
   "startNextRound": "Start Next Round",
-  "confirmStartRound": "Are you sure you want to start the next round?",
+
   "tournamentsData": {
     "warsaw-chess": "Grandmaster Chess Warsaw",
     "berlin-cs2": "Berlin Master League",
@@ -94,5 +129,362 @@
     "warsaw-volleyball": "Volleyball Amateur Tournament",
     "krakow-football": "Krakow Cup",
     "online-poker": "Texas Holdem Night"
+  },
+  "loading": "Loading...",
+  "userNotFound": "User not found",
+  "tournamentsJoined": "Tournaments Joined",
+  "activeTournaments": "Active Tournaments",
+  "upcomingTournaments": "Upcoming Tournaments",
+  "completedTournaments": "History",
+  "slots": "slots",
+  "open": "Open",
+  "confirmStartRoundTitle": "Start Next Round",
+  "confirmStartRound": "Are you sure you want to start the next round? This cannot be undone.",
+  "roundStarted": "Next round started successfully!",
+  "roundStartError": "Failed to start round.",
+  "joinedSuccess": "Successfully Joined!",
+  "waitlistJoined": "You are on the waitlist.",
+  "pendingRequest": "Request sent. Waiting for approval.",
+  "confirmWithdrawTitle": "Withdraw from Tournament",
+  "confirmWithdraw": "Are you sure you want to withdraw? If the tournament hasn't started, you will be removed completely.",
+  "withdrawSuccess": "Withdrawn successfully.",
+  "participantAdded": "Participant added successfully!",
+  "addParticipantError": "Failed to add participant. Check if user exists.",
+  "tournamentNotFound": "Tournament not found",
+  "overview": "Overview",
+  "pendingRequests": "Pending Requests",
+  "waitlist": "Waitlist",
+  "addManual": "Add Generic",
+  "addParticipant": "Add Participant",
+  "fillAllFields": "Please fill all required fields.",
+  "tournamentUpdated": "Tournament updated successfully!",
+  "updateError": "Failed to update tournament.",
+  "preview": "Preview",
+  "editTournament": "Edit Tournament",
+  "searchUser": "Search User...",
+  "add": "Add",
+  "saveChanges": "Save Changes",
+  "cancel": "Cancel",
+  "enableMatchEvents": "Enable detailed event tracking (goals, cards, timeline)",
+  "selectUserFromList": "Please select a valid user from the search",
+  "backToTournament": "Back to tournament",
+  "matchDetails": "Match Details",
+  "liveEvents": "Live Events",
+  "timeline": "Timeline",
+  "matchManagement": "Match Management",
+  "addManualEvent": "Add event manually",
+  "eventType": "Event Type",
+  "player": "Player",
+  "none": "None",
+  "home": "Home",
+  "away": "Away",
+  "minute": "Minute",
+  "eventDescPlaceholder": "e.g. Long range shot",
+  "addEvent": "Add event",
+  "quickHits": "Quick Actions",
+  "finalResultOverride": "Final Result Override",
+  "save": "Save",
+  "setFinalResult": "Set Final Result",
+  "homeScore": "Home Score",
+  "awayScore": "Away Score",
+  "saveResult": "Save Result",
+  "noMatches": "No matches yet. Start the round!",
+  "winnersBracket": "Winners Bracket",
+  "losersBracket": "Losers Bracket",
+  "noStandings": "No standings available yet.",
+  "score": "Score",
+  "matches": "Matches",
+  "resultSubmitted": "Result submitted successfully!",
+  "resultError": "Failed to submit result.",
+  "round": "Round",
+  "watchMatch": "Watch Match",
+  "manage": "Manage",
+  "tournament": {
+    "create": {
+      "title": "Create Tournament",
+      "nameLabel": "Tournament Name",
+      "gameLabel": "Game",
+      "systemLabel": "System",
+      "maxPlayers": "Max Players",
+      "rounds": "Rounds",
+      "registrationMode": "Registration Mode",
+      "enableMatchEvents": "Enable detailed event tracking (goals, cards, timeline)",
+      "emblem": "Emblem",
+      "startDate": "Start Date",
+      "endDate": "End Date",
+      "isOnline": "Online Tournament",
+      "city": "City",
+      "address": "Address",
+      "description": "Description",
+      "moderators": "Moderators (User IDs)",
+      "submitBtn": "Create Tournament"
+    },
+    "scoring": {
+      "title": "Scoring Rules",
+      "preset": "Preset",
+      "raw": "Raw Score (Sum)",
+      "custom": "Custom",
+      "winPoints": "Win Points",
+      "drawPoints": "Draw Points",
+      "lossPoints": "Loss Points",
+      "explanationRaw": "Standings will be calculated by summing the raw scores submitted in match results.",
+      "explanationPoints": "Standings will be calculated based on Win/Draw/Loss outcomes using specific point values."
+    },
+    "registration": {
+      "open": "Open (Auto-Join)",
+      "approval": "Approval Required"
+    },
+    "participant": {
+        "notFound": "Participant not found in this tournament.",
+        "viewFullProfile": "View Full Profile",
+        "matchHistory": "Match History",
+        "noMatches": "No matches played yet."
+    },
+    "edit": {
+        "title": "Edit Tournament"
+    },
+    "card": {
+        "system": "System",
+        "rounds": "Rounds",
+        "max": "Max"
+    },
+    "list": {
+        "empty": "No tournaments found"
+    },
+    "label": "Tournament",
+    "participants": {
+        "empty": "No participants yet.",
+        "none": "No participants"
+    },
+    "startNextRound": "Start Next Round",
+    "join": "Join Tournament",
+    "withdraw": "Withdraw",
+    "tabs": {
+        "overview": "Overview",
+        "rounds": "Rounds",
+        "standings": "Standings"
+    },
+    "pendingRequests": "Pending Requests",
+    "waitlist": "Waitlist",
+    "addGeneric": "Add Generic"
+  },
+  "emblem": {
+    "default": "Default",
+    "chessPawn": "Chess Pawn",
+    "shield": "Shield",
+    "diamond": "Diamond"
+  },
+  "common": {
+    "preview": "Preview",
+    "searchUserPlaceholder": "Search User...",
+    "searchUserAdd": "Search User to Add...",
+    "add": "Add",
+    "loading": "Loading...",
+    "saveChanges": "Save Changes",
+    "cancel": "Cancel",
+    "edit": "Edit",
+    "approve": "Approve",
+    "reject": "Reject",
+    "withdraw": "Withdraw",
+    "remove": "Remove",
+    "save": "Save",
+    "delete": "Delete",
+    "loadingProfile": "Loading profile...",
+    "unknown": "Unknown",
+    "player": "Player",
+    "loadMore": "Load More",
+    "km": "km",
+    "all": "All",
+    "manage": "Manage",
+    "seeDetails": "See Details",
+    "typeUsername": "Type username...",
+    "searching": "Searching...",
+    "noUsersFound": "No users found",
+    "description": "Description",
+    "none": "None",
+    "active": "Active",
+    "completed": "Completed",
+    "home": "Home",
+    "away": "Away",
+    "backToTournament": "Back to Tournament",
+    "saveResult": "Save Result",
+    "saving": "Saving...",
+    "round": "Round",
+    "score": "Score",
+    "matches": "Matches",
+    "playerA": "Player A",
+    "playerB": "Player B",
+    "viewProfile": "View Profile",
+    "details": "Details"
+
+  },
+  "error": {
+    "selectUser": "Please select a valid user from the search",
+    "createTournament": "Failed to create tournament",
+    "matchNotFound": "Match not found",
+    "unauthorized": "Unauthorized",
+    "unauthorizedMatch": "You are not authorized to manage this match.",
+    "tournamentNotFound": "Tournament not found"
+  },
+  "confirm": {
+      "removeParticipant": "Remove this participant completely? (Use Withdraw if tournament started)",
+      "withdrawParticipant": "Mark this participant as Withdrawn? They will forfeit future matches.",
+      "startRound": {
+          "title": "Start Next Round",
+          "message": "Are you sure you want to start the next round? This cannot be undone."
+      },
+      "withdraw": {
+          "title": "Withdraw from Tournament",
+          "message": "Are you sure you want to withdraw? If the tournament hasn't started, you will be removed completely."
+      }
+  },
+  "audit": {
+    "title": "Audit Log",
+    "hide": "Hide Audit Log",
+    "view": "View Audit Log",
+    "empty": "No changes recorded yet.",
+    "tournamentActions": "Tournament Actions",
+    "matchChanges": "Match Result Changes",
+    "by": "By:",
+    "target": "Target:"
+  },
+  "match": {
+    "manage": "Manage",
+    "management": {
+        "title": "Match Management"
+    },
+    "details": {
+        "title": "Match Details"
+    },
+    "playerA_fallback": "Player A",
+    "playerB_fallback": "Player B",
+    "homeShort": "Home",
+    "awayShort": "Away",
+    "quickActions": "Quick Actions",
+    "overrideResult": "Final Result Override",
+    "selectResult": "Select Result",
+    "editResult": "Edit Result",
+    "vs": "vs",
+    "table": "Table",
+    "minute": "Minute",
+    "eventDescPlaceholder": "e.g. Long range shot",
+    "addEvent": "Add event",
+    "setFinalResult": "Set Final Result",
+    "saveResult": "Save Result",
+    "liveEvents": "Live Events",
+    "addManualEvent": "Add event manually",
+    "eventType": "Event Type",
+    "timeline": "Timeline",
+    "noEvents": "No events yet",
+    "score": "Score",
+    "events": {
+        "title": "Live Events",
+        "addManual": "Add event manually",
+        "type": "Event Type",
+        "player": "Player",
+        "minute": "Minute",
+        "minutePlaceholder": "e.g. 45",
+        "descPlaceholder": "e.g. Long range shot",
+        "addBtn": "Add event",
+        "quickHits": "Quick Actions",
+        "timeline": "Timeline",
+        "noEvents": "No events yet",
+        "types": {
+            "goal": "GOAL",
+            "foul": "FOUL",
+            "yellowCard": "YELLOW CARD",
+            "redCard": "RED CARD",
+            "substitution": "SUBSTITUTION",
+            "other": "OTHER"
+        }
+    },
+    "result": {
+        "override": "Final Result Override",
+        "setTitle": "Set Final Result",
+        "homeScore": "Home Score",
+        "awayScore": "Away Score",
+        "walkoverHome": "Walkover (Home Win)",
+        "walkoverAway": "Walkover (Away Win)",
+        "normal": "Normal",
+        "walkover": "Walkover",
+        "pending": "PENDING",
+        "win": "WIN",
+        "loss": "LOSS",
+        "draw": "DRAW",
+        "bye": "BYE",
+        "home": "Home Score",
+        "away": "Away Score"
+    }
+  },
+  "event": {
+    "goal": "GOAL",
+    "foul": "FOUL",
+    "yellowCard": "YELLOW CARD",
+    "redCard": "RED CARD",
+    "substitution": "SUBSTITUTION",
+    "other": "OTHER"
+  },
+  "status": {
+      "withdrawn": "WITHDRAWN",
+      "withdrawn_parens": "(Withdrawn)",
+      "active": "Active",
+      "upcoming": "Upcoming",
+      "completed": "Completed"
+  },
+  "stats": {
+      "rank": "Rank",
+      "score": "Score",
+      "wins": "Wins",
+      "draws": "Draws",
+      "losses": "Losses",
+      "matches": "Matches",
+      "wdl": "W-D-L",
+      "tiebreakers": {
+          "buchholz": "Buchholz",
+          "sb": "SB",
+          "progressive": "Progressive",
+          "direct": "Direct Match"
+      }
+  },
+  "filter": {
+      "game": "Filter by Game",
+      "status": "Change Status",
+      "sortBy": "Sort By",
+      "clear": "Clear Filters"
+  },
+  "sort": {
+      "dateAsc": "Date (Asc)",
+      "dateDesc": "Date (Desc)"
+  },
+  "bracket": {
+      "round": "Round",
+      "winners": "Winners Bracket",
+      "losers": "Losers Bracket",
+      "resultSaved": "Result saved successfully!",
+      "saveError": "Failed to save result.",
+      "noMatches": "No matches generated yet.",
+      "selectResult": "Select Result",
+      "bye": "Bye",
+      "walkover": "Walkover"
+  },
+  "modal": {
+      "addParticipant": {
+          "title": "Add Participant",
+          "instruction": "Search for a user by username:"
+      }
+  },
+  "chess": {
+      "white": "White",
+      "black": "Black"
+  },
+  "tieBreakers": {
+      "BUCHHOLZ": "Buchholz",
+      "SONNEBORN_BERGER": "Sonneborn-Berger",
+      "PROGRESSIVE": "Progressive",
+      "WINS": "Wins",
+      "DIRECT_MATCH": "Direct Match"
+  },
+  "standings": {
+      "none": "No standings available yet."
   }
 }

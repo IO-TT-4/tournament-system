@@ -1,6 +1,6 @@
 {
   "title": "System parowania",
-  "description": "Uniwersalna platforma do tworzenia i śledzenia różnych typów turniejów, np. e-sportowych lub planszowych. System musi umożliwiać dodawanie uczestników (zarówno indywidualnych, jak i drużynowych), a następnie automatyczne generowanie drabinek turniejowych w różnych systemach. Kluczowe będzie wizualizowanie drabinek oraz aktualizacja i prezentacja wyników. System przechowuje również dane historyczne.",
+  "appDescription": "Uniwersalna platforma do tworzenia i śledzenia różnych typów turniejów, np. e-sportowych lub planszowych. System musi umożliwiać dodawanie uczestników (zarówno indywidualnych, jak i drużynowych), a następnie automatyczne generowanie drabinek turniejowych w różnych systemach. Kluczowe będzie wizualizowanie drabinek oraz aktualizacja i prezentacja wyników. System przechowuje również dane historyczne.",
   "currentTournaments": "Aktualne turnieje",
   "futureTournaments": "Nadchodzące turnieje",
   "allTournaments": "Wszystkie Turnieje",
@@ -11,7 +11,42 @@
   "createTournament": "Stwórz Turniej",
   "tournamentName": "Nazwa Turnieju",
   "game": "Gra",
-  "emblem": "Godło",
+  "menu": {
+      "logoAlt": "System Turniejowy",
+      "tournaments": "Turnieje",
+      "createTournament": "Stwórz Turniej",
+      "authorized": {
+          "logout": "Wyloguj"
+      },
+      "guest": {
+          "login": "Zaloguj"
+      }
+  },
+  "auth": {
+      "register": {
+          "title": "Stwórz Konto",
+          "button": "Zarejestruj się"
+      },
+      "login": {
+          "title": "Logowanie",
+          "button": "Zaloguj się",
+          "welcome": "Witaj ponownie!",
+          "noAccount": "Nie masz konta?"
+      },
+      "joinUs": "Dołącz do nas już dziś!",
+      "username": "Nazwa użytkownika",
+      "usernamePlaceholder": "Wpisz nazwę użytkownika",
+      "email": "Email",
+      "emailPlaceholder": "Wpisz email",
+      "password": "Hasło",
+      "retype": "Powtórz",
+      "passwordsMismatch": "Hasła nie są takie same!",
+      "hasAccount": "Masz już konto?",
+      "registerSuccess": "Rejestracja udana!",
+      "loginSuccess": "Zalogowano pomyślnie!",
+      "logoutSuccess": "Wylogowano pomyślnie"
+  },
+
   "onlineTournament": "Turniej Online",
   "address": "Adres",
   "moderators": "Moderatorzy (ID Użytkownika)",
@@ -40,7 +75,7 @@
   "loadMore": "Załaduj więcej",
   "filterByGame": "Dyscyplina",
   "all": "Wszystkie",
-  "status": "Status",
+
   "sortBy": "Sortuj według",
   "dateAsc": "Data: rosnąco",
   "dateDesc": "Data: malejąco",
@@ -82,7 +117,7 @@
   "noParticipants": "Brak uczestników.",
   "organizer": "Organizator",
   "startNextRound": "Rozpocznij kolejną rundę",
-  "confirmStartRound": "Czy na pewno chcesz rozpocząć kolejną rundę?",
+
   "tournamentsData": {
     "warsaw-chess": "Grandmaster Chess Warszawa",
     "berlin-cs2": "Berlin Master League",
@@ -90,5 +125,361 @@
     "warsaw-volleyball": "Amatorski Turniej Siatkówki",
     "krakow-football": "Puchar Krakowa",
     "online-poker": "Texas Holdem Night"
+  },
+  "loading": "Ładowanie...",
+  "userNotFound": "Użytkownik nie znaleziony",
+  "tournamentsJoined": "Dołączone turnieje",
+  "activeTournaments": "Aktywne Turnieje",
+  "upcomingTournaments": "Nadchodzące Turnieje",
+  "completedTournaments": "Historia",
+  "slots": "miejsca",
+  "open": "Otwarte",
+  "confirmStartRoundTitle": "Rozpocznij następną rundę",
+  "confirmStartRound": "Czy na pewno chcesz rozpocząć następną rundę? Tej operacji nie można cofnąć.",
+  "roundStarted": "Następna runda rozpoczęta pomyślnie!",
+  "roundStartError": "Nie udało się rozpocząć rundy.",
+  "joinedSuccess": "Pomyślnie dołączono!",
+  "waitlistJoined": "Jesteś na liście rezerwowej.",
+  "pendingRequest": "Prośba wysłana. Oczekiwanie na zatwierdzenie.",
+  "confirmWithdrawTitle": "Wycofaj się z turnieju",
+  "confirmWithdraw": "Czy na pewno chcesz się wycofać? Jeśli turniej się nie rozpoczął, zostaniesz całkowicie usunięty.",
+  "withdrawSuccess": "Wycofano pomyślnie.",
+  "participantAdded": "Uczestnik dodany pomyślnie!",
+  "addParticipantError": "Nie udało się dodać uczestnika. Sprawdź, czy użytkownik istnieje.",
+  "tournamentNotFound": "Turniej nie znaleziony",
+  "overview": "Przegląd",
+  "pendingRequests": "Oczekujące prośby",
+  "waitlist": "Lista rezerwowa",
+  "addManual": "Dodaj Gener.",
+  "addParticipant": "Dodaj Uczestnika",
+  "fillAllFields": "Proszę wypełnić wszystkie wymagane pola.",
+  "tournamentUpdated": "Turniej zaktualizowany pomyślnie!",
+  "updateError": "Nie udało się zaktualizować turnieju.",
+  "preview": "Podgląd",
+  "editTournament": "Edytuj Turniej",
+  "searchUser": "Szukaj użytkownika...",
+  "add": "Dodaj",
+  "saveChanges": "Zapisz zmiany",
+  "cancel": "Anuluj",
+  "enableMatchEvents": "Włącz szczegółową obsługę zdarzeń (gole, kartki, oś czasu)",
+  "selectUserFromList": "Proszę wybrać poprawnego użytkownika z wyszukiwania",
+  "backToTournament": "Wróć do turnieju",
+  "matchDetails": "Szczegóły Meczu",
+  "liveEvents": "Zdarzenia na żywo",
+  "timeline": "Oś Czasu",
+  "matchManagement": "Zarządzanie Meczem",
+  "addManualEvent": "Dodaj zdarzenie ręcznie",
+  "eventType": "Typ zdarzenia",
+  "player": "Zawodnik",
+  "none": "Brak",
+  "home": "Gosp.",
+  "away": "Goście",
+  "minute": "Minuta",
+  "eventDescPlaceholder": "np. Strzał z dystansu",
+  "addEvent": "Dodaj zdarzenie",
+  "quickHits": "Szybkie akcje",
+  "finalResultOverride": "Korekta Wyniku Końcowego",
+  "save": "Zapisz",
+  "setFinalResult": "Ustaw Wynik Końcowy",
+  "homeScore": "Wynik Gospodarze",
+  "awayScore": "Wynik Goście",
+  "saveResult": "Zapisz Wynik",
+  "noMatches": "Brak meczów. Rozpocznij rundę!",
+  "winnersBracket": "Drabinka Wygranych",
+  "losersBracket": "Drabinka Przegranych",
+  "noStandings": "Tabela niedostępna.",
+  "score": "Wynik",
+  "matches": "Mecze",
+  "resultSubmitted": "Wynik wysłany pomyślnie!",
+  "resultError": "Nie udało się zapisać wyniku.",
+  "round": "Runda",
+  "watchMatch": "Oglądaj Mecz",
+  "manage": "Zarządzaj",
+  "tournament": {
+    "create": {
+      "title": "Stwórz Turniej",
+      "nameLabel": "Nazwa Turnieju",
+      "gameLabel": "Gra",
+      "systemLabel": "System",
+      "maxPlayers": "Max Graczy",
+      "rounds": "Rundy",
+      "registrationMode": "Tryb Rejestracji",
+      "enableMatchEvents": "Włącz szczegółową obsługę zdarzeń (gole, kartki, oś czasu)",
+      "emblem": "Godło",
+      "startDate": "Data Rozpoczęcia",
+      "endDate": "Data Zakończenia",
+      "isOnline": "Turniej Online",
+      "city": "Miasto",
+      "address": "Adres",
+      "description": "Opis",
+      "moderators": "Moderatorzy (ID Użytkownika)",
+      "submitBtn": "Stwórz Turniej"
+    },
+    "scoring": {
+      "title": "Zasady Punktacji",
+      "preset": "Szablon",
+      "raw": "Surowy Wynik (Suma)",
+      "custom": "Własny",
+      "winPoints": "Punkty za Wygraną",
+      "drawPoints": "Punkty za Remis",
+      "lossPoints": "Punkty za Porażkę",
+      "explanationRaw": "Tabela będzie liczona na podstawie sumy punktów wpisanych w wynikach meczów.",
+      "explanationPoints": "Tabela będzie liczona na podstawie wygranych/remisów/przegranych używając określonych wartości punktowych."
+    },
+    "registration": {
+      "open": "Otwarty (Auto-Dołączenie)",
+      "approval": "Wymagana Akceptacja"
+    },
+    "participant": {
+        "notFound": "Uczestnik nie znaleziony w tym turnieju.",
+        "viewFullProfile": "Zobacz Pełny Profil",
+        "matchHistory": "Historia Meczów",
+        "noMatches": "Brak rozegranych meczów."
+    },
+    "edit": {
+        "title": "Edytuj Turniej"
+    },
+    "card": {
+        "system": "System",
+        "rounds": "Rundy",
+        "max": "Max"
+    },
+    "list": {
+        "empty": "Nie znaleziono turniejów"
+    },
+    "label": "Turniej",
+    "participants": {
+        "empty": "Brak uczestników.",
+        "none": "Brak uczestników"
+    },
+    "startNextRound": "Rozpocznij Następną Rundę",
+    "join": "Dołącz do Turnieju",
+    "withdraw": "Wycofaj się",
+    "tabs": {
+        "overview": "Przegląd",
+        "rounds": "Rundy",
+        "standings": "Tabela"
+    },
+    "pendingRequests": "Oczekujące Prośby",
+    "waitlist": "Lista Rezerwowa",
+    "addGeneric": "Dodaj Gener."
+  },
+  "emblem": {
+    "default": "Domyślne",
+    "chessPawn": "Pionek Szachowy",
+    "shield": "Tarcza",
+    "diamond": "Diament"
+  },
+  "common": {
+    "preview": "Podgląd",
+    "searchUserPlaceholder": "Szukaj użytkownika...",
+    "searchUserAdd": "Szukaj użytkownika do dodania...",
+    "add": "Dodaj",
+    "loading": "Ładowanie...",
+    "saveChanges": "Zapisz Zmiany",
+    "cancel": "Anuluj",
+    "edit": "Edytuj",
+    "approve": "Zatwierdź",
+    "reject": "Odrzuć",
+    "withdraw": "Wycofaj",
+    "remove": "Usuń",
+    "save": "Zapisz",
+    "delete": "Usuń",
+    "loadingProfile": "Ładowanie profilu...",
+    "unknown": "Nieznany",
+    "player": "Gracz",
+    "loadMore": "Załaduj Więcej",
+    "km": "km",
+    "all": "Wszystkie",
+    "manage": "Zarządzaj",
+    "seeDetails": "Zobacz Szczegóły",
+    "typeUsername": "Wpisz nazwę użytkownika...",
+    "searching": "Szukanie...",
+    "noUsersFound": "Nie znaleziono użytkowników",
+    "description": "Opis",
+    "none": "Brak",
+    "active": "Aktywny",
+    "completed": "Zakończony",
+    "home": "Gosp.",
+    "away": "Goście",
+    "backToTournament": "Wróć do Turnieju",
+    "saveResult": "Zapisz Wynik",
+    "saving": "Zapisywanie...",
+    "round": "Runda",
+    "score": "Wynik",
+    "matches": "Mecze",
+    "playerA": "Gracz A",
+    "playerB": "Gracz B",
+    "viewProfile": "Zobacz Profil",
+    "details": "Szczegóły"
+  },
+  "error": {
+    "selectUser": "Proszę wybrać poprawnego użytkownika z listy",
+    "createTournament": "Nie udało się stworzyć turnieju",
+    "matchNotFound": "Mecz nie znaleziony",
+    "unauthorized": "Brak dostępu",
+    "unauthorizedMatch": "Nie masz uprawnień do zarządzania tym meczem.",
+    "tournamentNotFound": "Turniej nie znaleziony"
+  },
+  "confirm": {
+      "removeParticipant": "Usunąć tego uczestnika całkowicie? (Użyj Wycofaj jeśli turniej trwa)",
+      "withdrawParticipant": "Oznaczyć uczestnika jako Wycofany? Odda przyszłe mecze walkowerem.",
+      "startRound": {
+          "title": "Rozpocznij Następną Rundę",
+          "message": "Czy na pewno chcesz rozpocząć następną rundę? Tej operacji nie można cofnąć."
+      },
+      "withdraw": {
+          "title": "Wycofaj się z Turnieju",
+          "message": "Czy na pewno chcesz się wycofać? Jeśli turniej się nie rozpoczął, zostaniesz całkowicie usunięty."
+      }
+  },
+  "audit": {
+    "title": "Log Audytu",
+    "hide": "Ukryj Log",
+    "view": "Pokaż Log",
+    "empty": "Brak zarejestrowanych zmian.",
+    "tournamentActions": "Akcje Turniejowe",
+    "matchChanges": "Zmiany Wyników Meczów",
+    "by": "Przez:",
+    "target": "Cel:"
+  },
+  "match": {
+    "manage": "Zarządzaj",
+    "management": {
+        "title": "Zarządzanie Meczem"
+    },
+    "details": {
+        "title": "Szczegóły Meczu"
+    },
+    "playerA_fallback": "Gracz A",
+    "playerB_fallback": "Gracz B",
+    "homeShort": "Gosp.",
+    "awayShort": "Goście",
+    "quickActions": "Szybkie Akcje",
+    "overrideResult": "Korekta Wyniku Końcowego",
+    "selectResult": "Wybierz Wynik",
+    "editResult": "Edytuj Wynik",
+    "vs": "vs",
+    "table": "Stół",
+    "minute": "Minuta",
+    "eventDescPlaceholder": "np. Strzał z dystansu",
+    "addEvent": "Dodaj zdarzenie",
+    "setFinalResult": "Ustaw Wynik Końcowy",
+    "saveResult": "Zapisz Wynik",
+    "liveEvents": "Zdarzenia na Żywo",
+    "addManualEvent": "Dodaj zdarzenie ręcznie",
+    "eventType": "Typ Zdarzenia",
+    "timeline": "Oś Czasu",
+    "noEvents": "Brak zdarzeń",
+    "score": "Wynik",
+    "events": {
+        "title": "Zdarzenia na Żywo",
+        "addManual": "Dodaj zdarzenie ręcznie",
+        "type": "Typ Zdarzenia",
+        "player": "Zawodnik",
+        "minute": "Minuta",
+        "minutePlaceholder": "np. 45",
+        "descPlaceholder": "np. Strzał z dystansu",
+        "addBtn": "Dodaj zdarzenie",
+        "quickHits": "Szybkie Akcje",
+        "timeline": "Oś Czasu",
+        "noEvents": "Brak zdarzeń",
+        "types": {
+            "goal": "GOL",
+            "foul": "FAUL",
+            "yellowCard": "ŻÓŁTA KARTKA",
+            "redCard": "CZERWONA KARTKA",
+            "substitution": "ZMIANA",
+            "other": "INNE"
+        }
+    },
+    "result": {
+        "override": "Korekta Wyniku Końcowego",
+        "setTitle": "Ustaw Wynik Końcowy",
+        "homeScore": "Wynik Gosp.",
+        "awayScore": "Wynik Goście",
+        "walkoverHome": "Walkower (Wygrywa Gosp.)",
+        "walkoverAway": "Walkower (Wygrywają Goście)",
+        "normal": "Normalny",
+        "walkover": "Walkower",
+        "pending": "OCZEKUJE",
+        "win": "WYGRANA",
+        "loss": "PRZEGRANA",
+        "draw": "REMIS",
+        "bye": "WOLNY LOS",
+        "home": "Wynik Gosp.",
+        "away": "Wynik Goście"
+    }
+  },
+  "event": {
+    "goal": "GOL",
+    "foul": "FAUL",
+    "yellowCard": "ŻÓŁTA KARTKA",
+    "redCard": "CZERWONA KARTKA",
+    "substitution": "ZMIANA",
+    "other": "INNE"
+  },
+  "status": {
+      "withdrawn": "WYCOFANY",
+      "withdrawn_parens": "(Wycofany)",
+      "active": "Aktywny",
+      "upcoming": "Nadchodzący",
+      "completed": "Zakończony"
+  },
+  "stats": {
+      "rank": "Msc",
+      "score": "Pkt",
+      "wins": "W",
+      "draws": "R",
+      "losses": "P",
+      "matches": "Mecze",
+      "wdl": "W-R-P",
+      "tiebreakers": {
+          "buchholz": "Buchholz",
+          "sb": "SB",
+          "progressive": "Progresja",
+          "direct": "Bezpośredni"
+      }
+  },
+  "filter": {
+      "game": "Dyscyplina",
+      "status": "Status",
+      "sortBy": "Sortowanie",
+      "clear": "Wyczyść"
+  },
+  "sort": {
+      "dateAsc": "Data (Rosnąco)",
+      "dateDesc": "Data (Malejąco)"
+  },
+  "bracket": {
+      "round": "Runda",
+      "winners": "Drabinka Wygranych",
+      "losers": "Drabinka Przegranych",
+      "resultSaved": "Wynik zapisany pomyślnie!",
+      "saveError": "Nie udało się zapisać wyniku.",
+      "noMatches": "Nie wygenerowano jeszcze meczów.",
+      "selectResult": "Wybierz Wynik",
+      "bye": "Wolny Los",
+      "walkover": "Walkower"
+  },
+  "modal": {
+      "addParticipant": {
+          "title": "Dodaj Uczestnika",
+          "instruction": "Szukaj użytkownika po nazwie:"
+      }
+  },
+  "chess": {
+      "white": "Białe",
+      "black": "Czarne"
+  },
+  "tieBreakers": {
+      "BUCHHOLZ": "Buchholz",
+      "SONNEBORN_BERGER": "Sonneborn-Berger",
+      "PROGRESSIVE": "Progresja",
+      "WINS": "Wygrane",
+      "DIRECT_MATCH": "Bezpośredni Mecz"
+  },
+  "standings": {
+      "none": "Tabela niedostępna."
   }
 }

@@ -26,6 +26,7 @@ i18n.use(initReactI18next).init({
   },
   lng: localStorage.getItem('i18nextLng') || 'pl',
   fallbackLng: 'en',
+  defaultNS: 'mainPage', // Fallback to mainPage if no namespace specified
   interpolation: {
     escapeValue: false,
   },

@@ -28,6 +28,10 @@ namespace GFlow.Infrastructure.Migrations
                     b.Property<string>("Id")
                         .HasColumnType("text");
 
+                    b.Property<string>("FinishType")
+                        .HasColumnType("text")
+                        .HasColumnName("FinishType");
+
                     b.Property<string>("PlayerAwayId")
                         .HasColumnType("text");
 
@@ -40,6 +44,14 @@ namespace GFlow.Infrastructure.Migrations
 
                     b.Property<int>("RoundNumber")
                         .HasColumnType("integer");
+
+                    b.Property<double?>("ScoreA")
+                        .HasColumnType("double precision")
+                        .HasColumnName("ScoreA");
+
+                    b.Property<double?>("ScoreB")
+                        .HasColumnType("double precision")
+                        .HasColumnName("ScoreB");
 
                     b.Property<string>("TournamentId")
                         .IsRequired()
@@ -97,6 +109,51 @@ namespace GFlow.Infrastructure.Migrations
                     b.ToTable("MatchEvents");
                 });
 
+            modelBuilder.Entity("GFlow.Domain.Entities.MatchResultAudit", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("text");
+
+                    b.Property<string>("ChangeType")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("MatchId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("ModifiedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("ModifiedByDefaultId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<double>("NewScoreA")
+                        .HasColumnType("double precision");
+
+                    b.Property<double>("NewScoreB")
+                        .HasColumnType("double precision");
+
+                    b.Property<double?>("OldScoreA")
+                        .HasColumnType("double precision");
+
+                    b.Property<double?>("OldScoreB")
+                        .HasColumnType("double precision");
+
+                    b.Property<string>("TournamentId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("MatchId");
+
+                    b.HasIndex("ModifiedByDefaultId");
+
+                    b.ToTable("MatchResultAudits");
+                });
+
             modelBuilder.Entity("GFlow.Domain.Entities.Tournament", b =>
                 {
                     b.Property<string>("Id")
@@ -114,8 +171,14 @@ namespace GFlow.Infrastructure.Migrations
                     b.Property<string>("Description")
                         .HasColumnType("text");
 
+                    b.Property<double?>("DrawPoints")
+                        .HasColumnType("double precision");
+
                     b.Property<string>("Emblem")
                         .HasColumnType("text");
+
+                    b.Property<bool>("EnableMatchEvents")
+                        .HasColumnType("boolean");
 
                     b.Property<DateTime>("EndDate")
                         .HasColumnType("timestamp with time zone");
@@ -132,6 +195,9 @@ namespace GFlow.Infrastructure.Migrations
                     b.Property<double?>("Lng")
                         .HasColumnType("double precision");
 
+                    b.Property<double?>("LossPoints")
+                        .HasColumnType("double precision");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("text");
@@ -143,6 +209,9 @@ namespace GFlow.Infrastructure.Migrations
                         .HasColumnType("text");
 
                     b.Property<int>("PlayerLimit")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("RegistrationMode")
                         .HasColumnType("integer");
 
                     b.Property<int>("SeedingType")
@@ -164,11 +233,51 @@ namespace GFlow.Infrastructure.Migrations
                     b.Property<long>("ViewCount")
                         .HasColumnType("bigint");
 
+                    b.Property<double?>("WinPoints")
+                        .HasColumnType("double precision");
+
                     b.HasKey("Id");
 
                     b.HasIndex("OrganizerId");
 
                     b.ToTable("Tournaments");
+                });
+
+            modelBuilder.Entity("GFlow.Domain.Entities.TournamentAuditLog", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("text");
+
+                    b.Property<string>("ActionType")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Details")
+                        .HasColumnType("text");
+
+                    b.Property<string>("PerformedById")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("PerformedByUsername")
+                        .HasColumnType("text");
+
+                    b.Property<string>("TargetUserId")
+                        .HasColumnType("text");
+
+                    b.Property<string>("TargetUsername")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("Timestamp")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("TournamentId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("TournamentAuditLogs");
                 });
 
             modelBuilder.Entity("GFlow.Domain.Entities.User", b =>
@@ -238,14 +347,14 @@ namespace GFlow.Infrastructure.Migrations
                     b.Property<bool>("HasReceivedBye")
                         .HasColumnType("boolean");
 
-                    b.Property<bool>("IsWithdrawn")
-                        .HasColumnType("boolean");
-
                     b.Property<double>("Ranking")
                         .HasColumnType("double precision");
 
                     b.Property<double>("Score")
                         .HasColumnType("double precision");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("integer");
 
                     b.HasKey("TournamentId", "UserId");
 
@@ -300,34 +409,6 @@ namespace GFlow.Infrastructure.Migrations
                         .HasForeignKey("TournamentId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.OwnsOne("GFlow.Domain.ValueObjects.MatchResult", "Result", b1 =>
-                        {
-                            b1.Property<string>("MatchId")
-                                .HasColumnType("text");
-
-                            b1.Property<string>("FinishType")
-                                .IsRequired()
-                                .HasColumnType("text")
-                                .HasColumnName("FinishType");
-
-                            b1.Property<double>("ScoreA")
-                                .HasColumnType("double precision")
-                                .HasColumnName("ScoreA");
-
-                            b1.Property<double>("ScoreB")
-                                .HasColumnType("double precision")
-                                .HasColumnName("ScoreB");
-
-                            b1.HasKey("MatchId");
-
-                            b1.ToTable("Matches");
-
-                            b1.WithOwner()
-                                .HasForeignKey("MatchId");
-                        });
-
-                    b.Navigation("Result");
                 });
 
             modelBuilder.Entity("GFlow.Domain.Entities.MatchEvent", b =>
@@ -341,6 +422,21 @@ namespace GFlow.Infrastructure.Migrations
                     b.HasOne("GFlow.Domain.Entities.User", null)
                         .WithMany()
                         .HasForeignKey("RecordedBy")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("GFlow.Domain.Entities.MatchResultAudit", b =>
+                {
+                    b.HasOne("GFlow.Domain.Entities.Match", null)
+                        .WithMany()
+                        .HasForeignKey("MatchId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("GFlow.Domain.Entities.User", null)
+                        .WithMany()
+                        .HasForeignKey("ModifiedByDefaultId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
                 });

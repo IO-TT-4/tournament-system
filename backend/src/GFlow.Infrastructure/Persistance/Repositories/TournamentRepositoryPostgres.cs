@@ -113,6 +113,16 @@ namespace GFlow.Infrastructure.Persistance.Repositories
             return await _context.TournamentParticipants.FindAsync(tournamentId, userId);
         }
 
+        public async Task<bool> DeleteParticipant(string tournamentId, string userId)
+        {
+            var entity = await _context.TournamentParticipants.FindAsync(tournamentId, userId);
+            if (entity == null) return false;
+
+            _context.TournamentParticipants.Remove(entity);
+            await _context.SaveChangesAsync();
+            return true;
+        }
+
         public async Task<List<Match>> GetMatchesByRound(string tournamentId, int roundNumber)
         {
             return await _context.Matches
@@ -233,6 +243,46 @@ namespace GFlow.Infrastructure.Persistance.Repositories
                 .Where(a => a.UserId == userId)
                 .OrderByDescending(a => a.Timestamp)
                 .Take(limit)
+                .ToListAsync();
+        }
+
+        public async Task AddMatchResultAudit(MatchResultAudit audit)
+        {
+            await _context.MatchResultAudits.AddAsync(audit);
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task<List<MatchResultAudit>> GetMatchResultAudits(string tournamentId)
+        {
+            return await _context.MatchResultAudits
+                .Where(a => a.TournamentId == tournamentId)
+                .OrderByDescending(a => a.ModifiedAt)
+                .ToListAsync();
+        }
+
+        public async Task AddTournamentAuditAsync(TournamentAuditLog log)
+        {
+            await _context.TournamentAuditLogs.AddAsync(log);
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task<List<TournamentAuditLog>> GetTournamentAuditsAsync(string tournamentId)
+        {
+            return await _context.TournamentAuditLogs
+                .Where(a => a.TournamentId == tournamentId)
+                .OrderByDescending(a => a.Timestamp)
+                .ToListAsync();
+        }
+
+        public async Task<List<Tournament>> GetTournamentsByUserId(string userId)
+        {
+            return await _context.Tournaments
+                .Include(t => t.Organizer)
+                // Filter where user is Organizer OR is in the Participants list (check Participant entity or Participants collection if joined)
+                // Since we have TournamentParticipants table, it's safer to query via that or Include Participants.
+                // However, navigation property `Participants` in `Tournament` entity (List<User>) is configured.
+                .Where(t => t.OrganizerId == userId || t.Participants.Any(p => p.Id == userId))
+                .OrderByDescending(t => t.StartDate)
                 .ToListAsync();
         }
     }

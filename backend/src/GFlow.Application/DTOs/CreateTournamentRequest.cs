@@ -14,6 +14,13 @@ namespace GFlow.Application.DTOs
         public int? NumberOfRounds { get; set; }
         public List<string>? TieBreakers { get; set; }
         
+        public double? WinPoints { get; set; }
+        public double? DrawPoints { get; set; }
+        public double? LossPoints { get; set; }
+        public bool EnableMatchEvents { get; set; } = false;
+        
+        public RegistrationMode RegistrationMode { get; set; } = RegistrationMode.Open;
+
         // Location Details
         public string? CountryCode { get; set; }
         public string? City { get; set; }

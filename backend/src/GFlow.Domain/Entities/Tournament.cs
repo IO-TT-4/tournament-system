@@ -20,6 +20,11 @@ namespace GFlow.Domain.Entities
     /// How players should be seeded/paired in the first round (Swiss/Elimination).
     /// </summary>
     public SeedingType SeedingType { get; set; } = SeedingType.Random;
+
+    /// <summary>
+    /// How users can join the tournament.
+    /// </summary>
+    public RegistrationMode RegistrationMode { get; set; } = RegistrationMode.Open;
     
     /// <summary>
     /// List of Tie Breaker codes (e.g., "BUCHHOLZ", "SONNEBORN_BERGER", "DIRECT_MATCH").
@@ -43,6 +48,17 @@ namespace GFlow.Domain.Entities
 
     // Statistics
     public long ViewCount { get; set; }
+
+    // Scoring Rules (Optional - overrides raw score summation)
+    public double? WinPoints { get; set; }
+    public double? DrawPoints { get; set; }
+    public double? LossPoints { get; set; }
+    
+    /// <summary>
+    /// When true, shows Live Match Dashboard with timeline and event buttons.
+    /// When false, shows Simple Scoreboard Editor (just score inputs).
+    /// </summary>
+    public bool EnableMatchEvents { get; set; } = false;
 }
 
 

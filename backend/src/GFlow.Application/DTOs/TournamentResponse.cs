@@ -28,12 +28,21 @@ namespace GFlow.Application.DTOs
     public required string OrganizerId { get; set; }
     public List<string> ModeratorIds { get; set; } = new();
     public List<ParticipantDto> Participants { get; set; } = new();
+    
+    public double? WinPoints { get; set; }
+    public double? DrawPoints { get; set; }
+    public double? LossPoints { get; set; }
+    
+    public string RegistrationMode { get; set; } = "Open";
+    public bool EnableMatchEvents { get; set; } = false;
 }
 
 public class ParticipantDto
 {
     public required string Id { get; set; }
     public required string Username { get; set; }
+    public bool IsWithdrawn { get; set; }
+    public string Status { get; set; } = "Confirmed";
 }
 
 

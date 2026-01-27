@@ -139,13 +139,13 @@ function Tournaments() {
                 <select value={gameFilter} onChange={(e) => setGameFilter(e.target.value)} className="filter-select">
                   <option value="all">{t('all')}</option>
                   {disciplines.map((d) => (
-                    <option key={d} value={d}>{t(`games.${d}`) || d}</option>
+                    <option key={d} value={d}>{t(`games.${d}`)}</option>
                   ))}
                 </select>
               </div>
 
               <div className="filter-item">
-                <label>{t('status')}:</label>
+                <label>{t('filter.status')}:</label>
                 <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className="filter-select">
                   <option value="all">{t('all')}</option>
                   <option value="active">{t('active')}</option>
@@ -186,7 +186,7 @@ function Tournaments() {
             {tournaments.length < totalCount && (
               <div className="load-more-container">
                 <button className="load-more-btn" onClick={() => fetchResults(true)} disabled={loading}>
-                  {loading ? '...' : t('loadMore') || 'Load More'}
+                  {loading ? '...' : t('loadMore')}
                 </button>
               </div>
             )}

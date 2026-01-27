@@ -26,7 +26,12 @@ function CreateTournament() {
     emblem: 'default',
     description: '',
     numberOfRounds: 5,
-    tieBreakers: [] as string[]
+    tieBreakers: [] as string[],
+    winPoints: undefined as number | undefined,
+    drawPoints: undefined as number | undefined,
+    lossPoints: undefined as number | undefined,
+    registrationMode: 'Open',
+    enableMatchEvents: false
   });
 
   const [moderators, setModerators] = useState<{ id: string, username: string }[]>([]);
@@ -36,6 +41,32 @@ function CreateTournament() {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const calcScoringPreset = () => {
+    const { winPoints, drawPoints, lossPoints } = formData;
+    if (winPoints === undefined && drawPoints === undefined && lossPoints === undefined) return 'raw';
+    if (winPoints === 1 && drawPoints === 0.5 && lossPoints === 0) return 'chess';
+    if (winPoints === 3 && drawPoints === 1 && lossPoints === 0) return 'football';
+    return 'custom';
+  };
+
+  const applyScoringPreset = (val: string) => {
+    if (val === 'raw') {
+        setFormData(prev => ({...prev, winPoints: undefined, drawPoints: undefined, lossPoints: undefined}));
+    } else if (val === 'chess') {
+        setFormData(prev => ({...prev, winPoints: 1, drawPoints: 0.5, lossPoints: 0}));
+    } else if (val === 'football') {
+        setFormData(prev => ({...prev, winPoints: 3, drawPoints: 1, lossPoints: 0}));
+    } else {
+         // Custom, defaults to current or 0
+         setFormData(prev => ({
+             ...prev, 
+             winPoints: prev.winPoints ?? 0, 
+             drawPoints: prev.drawPoints ?? 0, 
+             lossPoints: prev.lossPoints ?? 0
+         }));
+    }
   };
 
   const handleGameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -75,7 +106,7 @@ function CreateTournament() {
       } else {
           // Optional: Allow non-search match if backend supports resolving by exact username later?
           // For now, let's enforce selection from search or exact match in results
-          toast.error(t('selectUserFromList') || 'Please select a valid user from the search');
+          toast.error(t('error.selectUser'));
       }
   };
 
@@ -109,7 +140,12 @@ function CreateTournament() {
       organizerId: 'UNKNOWN',
       description: formData.description,
       numberOfRounds: formData.systemType === 'SWISS' ? Number(formData.numberOfRounds) : undefined,
-      tieBreakers: formData.systemType === 'SWISS' ? formData.tieBreakers : []
+      tieBreakers: formData.systemType === 'SWISS' ? formData.tieBreakers : [],
+      winPoints: formData.winPoints,
+      drawPoints: formData.drawPoints,
+      lossPoints: formData.lossPoints,
+      registrationMode: formData.registrationMode,
+      enableMatchEvents: formData.enableMatchEvents
     };
 
     try {
@@ -128,14 +164,14 @@ function CreateTournament() {
       }
     } catch (error) {
       console.error(error);
-      toast.error('Failed to create tournament');
+      toast.error(t('error.createTournament'));
     }
   };
 
   // Preview Data
   const previewData = {
     id: 'preview',
-    title: formData.name || t('tournamentName'),
+    title: formData.name || t('tournament.create.nameLabel'),
     date: formData.startDate ? new Date(formData.startDate).toLocaleDateString() : 'Date',
     emblem: formData.emblem,
     game: { name: formData.gameName, code: formData.gameCode },
@@ -154,7 +190,7 @@ function CreateTournament() {
     <div className="create-tournament-page">
       {/* PREVIEW SECTION */}
       <div className="preview-section">
-        <label className="preview-label">Preview</label>
+        <label className="preview-label">{t('common.preview')}</label>
         <div style={{ transform: 'scale(0.9)' }}>
           <Emblem 
             title={previewData.title}
@@ -173,17 +209,17 @@ function CreateTournament() {
 
       {/* FORM SECTION */}
       <div className="create-tournament-container">
-        <h2>{t('createTournament') || 'Create Tournament'}</h2>
+        <h2>{t('tournament.create.title')}</h2>
         <form onSubmit={handleSubmit}>
           
           <div className="form-group">
-            <label>{t('tournamentName') || 'Tournament Name'}</label>
+            <label>{t('tournament.create.nameLabel')}</label>
             <input required name="name" value={formData.name} onChange={handleChange} minLength={5} />
           </div>
 
           <div className="form-row">
             <div className="form-group">
-              <label>{t('game') || 'Game'}</label>
+              <label>{t('tournament.create.gameLabel')}</label>
               <input 
                 list="games-list" 
                 name="gameName" 
@@ -205,7 +241,7 @@ function CreateTournament() {
               </datalist>
             </div>
             <div className="form-group">
-              <label>{t('systemType') || 'System'}</label>
+              <label>{t('tournament.create.systemLabel')}</label>
               <select name="systemType" value={formData.systemType} onChange={handleChange}>
                 <option value="SINGLE_ELIMINATION">{t('systemTypes.SINGLE_ELIMINATION')}</option>
                 <option value="DOUBLE_ELIMINATION">{t('systemTypes.DOUBLE_ELIMINATION')}</option>
@@ -216,22 +252,35 @@ function CreateTournament() {
             </div>
           </div>
 
-
-
-// ...
-
           <div className="form-row">
             <div className="form-group">
-              <label>{t('maxPlayers') || 'Max Players'}</label>
+              <label>{t('tournament.create.maxPlayers')}</label>
               <input type="number" name="maxPlayers" value={formData.maxPlayers} onChange={handleChange} min={2} />
             </div>
 
             {formData.systemType === 'SWISS' && (
               <div className="form-group">
-                <label>{t('rounds') || 'Rounds'}</label>
+                <label>{t('tournament.create.rounds')}</label>
                 <input type="number" name="numberOfRounds" value={formData.numberOfRounds} onChange={handleChange} min={1} />
               </div>
             )}
+            <div className="form-group">
+                <label>{t('tournament.create.registrationMode')}</label>
+                <select name="registrationMode" value={formData.registrationMode} onChange={handleChange}>
+                    <option value="Open">{t('tournament.registration.open')}</option>
+                    <option value="ApprovalRequired">{t('tournament.registration.approval')}</option>
+                </select>
+            </div>
+            <div className="form-group">
+                <label className="checkbox-label">
+                    <input 
+                        type="checkbox" 
+                        checked={formData.enableMatchEvents} 
+                        onChange={(e) => setFormData(prev => ({...prev, enableMatchEvents: e.target.checked}))} 
+                    />
+                    {t('tournament.create.enableMatchEvents')}
+                </label>
+            </div>
           </div>
           
            {/* Tie Breakers */}
@@ -242,22 +291,22 @@ function CreateTournament() {
            />
 
           <div className="form-group">
-             <label>{t('emblem') || 'Emblem'}</label>
+             <label>{t('tournament.create.emblem')}</label>
              <select name="emblem" value={formData.emblem} onChange={handleChange}>
-               <option value="default">Default</option>
-               <option value="chess-pawn">Chess Pawn</option>
-               <option value="shield">Shield</option>
-               <option value="diamond">Diamond</option>
+               <option value="default">{t('emblem.default')}</option>
+               <option value="chess-pawn">{t('emblem.chessPawn')}</option>
+               <option value="shield">{t('emblem.shield')}</option>
+               <option value="diamond">{t('emblem.diamond')}</option>
              </select>
           </div>
 
           <div className="form-row">
             <div className="form-group">
-              <label>{t('startDate')}</label>
+              <label>{t('tournament.create.startDate')}</label>
               <input type="datetime-local" name="startDate" value={formData.startDate} onChange={handleChange} required />
             </div>
             <div className="form-group">
-              <label>{t('endDate') || 'End Date'}</label>
+              <label>{t('tournament.create.endDate')}</label>
               <input type="datetime-local" name="endDate" value={formData.endDate} onChange={handleChange} required />
             </div>
           </div>
@@ -265,43 +314,43 @@ function CreateTournament() {
           <div className="form-group">
             <label className="checkbox-label">
               <input type="checkbox" checked={formData.isOnline} onChange={handleCheckbox} />
-              {t('onlineTournament') || 'Online Tournament'}
+              {t('tournament.create.isOnline')}
             </label>
           </div>
 
           {!formData.isOnline && (
             <div className="form-row">
               <div className="form-group">
-                <label>{t('city') || 'City'}</label>
+                <label>{t('tournament.create.city')}</label>
                 <input name="city" value={formData.city} onChange={handleChange} required={!formData.isOnline} />
               </div>
               <div className="form-group">
-                <label>{t('address') || 'Address'}</label>
+                <label>{t('tournament.create.address')}</label>
                 <input name="address" value={formData.address} onChange={handleChange} />
               </div>
             </div>
           )}
           
           <div className="form-group">
-            <label>{t('description') || 'Description'}</label>
+            <label>{t('tournament.create.description')}</label>
             <HtmlEditor value={formData.description} onChange={handleDescriptionChange} />
           </div>
 
           <div className="form-group">
-            <label>{t('moderators') || 'Moderators (User IDs)'}</label>
+            <label>{t('tournament.create.moderators')}</label>
             <div className="moderator-input-group" style={{ position: 'relative' }}>
               <input 
                 list="moderator-datalist"
                 value={currentModQuery} 
                 onChange={(e) => handleSearch(e.target.value)} 
-                placeholder={t('searchUser') || "Search User..."} 
+                placeholder={t('common.searchUserPlaceholder')} 
               />
               <datalist id="moderator-datalist">
                   {searchResults.map(user => (
                       <option key={user.id} value={user.username} />
                   ))}
               </datalist>
-              <button onClick={handleAddClick} type="button">{t('add') || 'Add'}</button>
+              <button onClick={handleAddClick} type="button">{t('common.add')}</button>
             </div>
             <div className="moderators-list">
               {moderators.map(mod => (
@@ -312,7 +361,58 @@ function CreateTournament() {
             </div>
           </div>
 
-          <button type="submit" className="submit-btn">{t('createBtn') || 'Create Tournament'}</button>
+        {/* Scoring Rules Section */}
+        <div className="form-group management-section">
+            <label>{t('tournament.scoring.title')}</label>
+            <div className="form-row">
+                <div className="form-group">
+                    <label>{t('tournament.scoring.preset')}</label>
+                    <select 
+                        value={calcScoringPreset()} 
+                        onChange={(e) => applyScoringPreset(e.target.value)}
+                    >
+                        <option value="raw">{t('tournament.scoring.raw')}</option>
+                        <option value="chess">Chess (1 / 0.5 / 0)</option>
+                        <option value="football">League/Football (3 / 1 / 0)</option>
+                        <option value="custom">{t('tournament.scoring.custom')}</option>
+                    </select>
+                </div>
+            </div>
+            
+            {calcScoringPreset() !== 'raw' && (
+                <div className="form-row">
+                    <div className="form-group">
+                        <label>{t('tournament.scoring.winPoints')}</label>
+                        <input 
+                            type="number" 
+                            step="0.5" 
+                            value={formData.winPoints ?? 0} 
+                            onChange={(e) => setFormData(prev => ({...prev, winPoints: parseFloat(e.target.value)}))}
+                        />
+                    </div>
+                    <div className="form-group">
+                        <label>{t('tournament.scoring.drawPoints')}</label>
+                        <input 
+                            type="number" 
+                            step="0.5" 
+                            value={formData.drawPoints ?? 0} 
+                            onChange={(e) => setFormData(prev => ({...prev, drawPoints: parseFloat(e.target.value)}))}
+                        />
+                    </div>
+                    <div className="form-group">
+                        <label>{t('tournament.scoring.lossPoints')}</label>
+                        <input 
+                            type="number" 
+                            step="0.5" 
+                            value={formData.lossPoints ?? 0} 
+                            onChange={(e) => setFormData(prev => ({...prev, lossPoints: parseFloat(e.target.value)}))}
+                        />
+                    </div>
+                </div>
+            )}
+        </div>
+
+          <button type="submit" className="submit-btn">{t('tournament.create.submitBtn')}</button>
         </form>
       </div>
     </div>

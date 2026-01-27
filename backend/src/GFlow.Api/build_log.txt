@@ -1,0 +1,14 @@
+  Trwa określanie projektów do przywrócenia...
+  Wszystkie projekty są aktualne na potrzeby przywrócenia.
+  GFlow.Domain -> E:\repos\IO-IT-4\tournament-system\backend\src\GFlow.Domain\bin\Debug\net9.0\GFlow.Domain.dll
+  GFlow.Application -> E:\repos\IO-IT-4\tournament-system\backend\src\GFlow.Application\bin\Debug\net9.0\GFlow.Application.dll
+  GFlow.Infrastructure -> E:\repos\IO-IT-4\tournament-system\backend\src\GFlow.Infrastructure\bin\Debug\net9.0\GFlow.Infrastructure.dll
+  GFlow.Api -> E:\repos\IO-IT-4\tournament-system\backend\src\GFlow.Api\bin\Debug\net9.0\GFlow.Api.dll
+
+Kompilacja powiodła się.
+    Ostrzeżenia: 0
+    Liczba błędów: 0
+
+Czas, który upłynął: 00:00:01.12
+
+Dostępne są aktualizacje obciążenia. Uruchom polecenie `dotnet workload list`, aby uzyskać więcej informacji.
